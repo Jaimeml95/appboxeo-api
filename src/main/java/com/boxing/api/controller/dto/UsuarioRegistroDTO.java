@@ -14,29 +14,24 @@ public class UsuarioRegistroDTO {
     @Email(message = "El formato del email no es válido")
     private String email;
 
-    // Constructor vacío requerido para la deserialización de Jackson (JSON -> Objeto)
-    public UsuarioRegistroDTO() {
-    }
+    @NotBlank(message = "La contraseña no puede estar vacía")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+    private String password;
 
-    public UsuarioRegistroDTO(String nombre, String email) {
+    public UsuarioRegistroDTO() {}
+
+    public UsuarioRegistroDTO(String nombre, String email, String password) {
         this.nombre = nombre;
         this.email = email;
+        this.password = password;
     }
 
-    // Getters y Setters
-    public String getNombre() {
-        return nombre;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 }

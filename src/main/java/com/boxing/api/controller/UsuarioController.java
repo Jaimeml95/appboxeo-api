@@ -1,6 +1,6 @@
 package com.boxing.api.controller;
 
-import com.boxing.api.controller.dto.UsuarioRegistroDTO;
+import com.boxing.api.controller.dto.UsuarioAdminCrearDTO;
 import com.boxing.api.model.Usuario;
 import com.boxing.api.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,34 +12,26 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "Usuarios", description = "Gestión de usuarios de la aplicación de boxeo")
+@Tag(name = "Usuarios", description = "Gestión de usuarios — solo ADMIN")
 @RestController
 @RequestMapping("/api/v1/usuarios")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    // Inyección por constructor
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
 
-    @Operation(summary = "Registrar usuario", description = "Crea un nuevo usuario. Devuelve 409 si el email ya existe.")
+    @Operation(summary = "Crear usuario", description = "Crea un usuario con el rol especificado. Solo ADMIN.")
     @PostMapping
-    public ResponseEntity<Usuario> registrarUsuario(@Valid @RequestBody UsuarioRegistroDTO dto) {
-        // Mapeo manual del DTO a la Entidad (Mantiene el control sin librerías externas por ahora)
-        Usuario usuarioAInsertar = new Usuario(dto.getNombre(), dto.getEmail());
-
-        Usuario usuarioRegistrado = usuarioService.registrarUsuario(usuarioAInsertar);
-
-        // Devolvemos un HTTP 201 Created junto al objeto guardado
-        return new ResponseEntity<>(usuarioRegistrado, HttpStatus.CREATED);
+    public ResponseEntity<Usuario> crearUsuario(@Valid @RequestBody UsuarioAdminCrearDTO dto) {
+        return new ResponseEntity<>(usuarioService.crearUsuarioPorAdmin(dto), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Listar usuarios", description = "Devuelve todos los usuarios registrados.")
+    @Operation(summary = "Listar usuarios", description = "Devuelve todos los usuarios registrados. Solo ADMIN.")
     @GetMapping
     public ResponseEntity<List<Usuario>> listarUsuarios() {
-        List<Usuario> usuarios = usuarioService.obtenerTodos();
-        return ResponseEntity.ok(usuarios);
+        return ResponseEntity.ok(usuarioService.obtenerTodos());
     }
 }
