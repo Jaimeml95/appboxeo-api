@@ -3,8 +3,8 @@ package com.boxing.api.controller;
 import com.boxing.api.controller.dto.LoginRequestDTO;
 import com.boxing.api.controller.dto.LoginResponseDTO;
 import com.boxing.api.controller.dto.UsuarioRegistroDTO;
+import com.boxing.api.controller.dto.UsuarioResponseDTO;
 import com.boxing.api.exception.ErrorResponseDTO;
-import com.boxing.api.model.Usuario;
 import com.boxing.api.service.JwtService;
 import com.boxing.api.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,7 +46,7 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "El email ya está registrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PostMapping("/registro")
-    public ResponseEntity<Usuario> registro(@Valid @RequestBody UsuarioRegistroDTO dto) {
+    public ResponseEntity<UsuarioResponseDTO> registro(@Valid @RequestBody UsuarioRegistroDTO dto) {
         return new ResponseEntity<>(usuarioService.registrarBoxeador(dto), HttpStatus.CREATED);
     }
 

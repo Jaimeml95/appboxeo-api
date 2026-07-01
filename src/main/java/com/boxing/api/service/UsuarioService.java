@@ -2,16 +2,16 @@ package com.boxing.api.service;
 
 import com.boxing.api.controller.dto.UsuarioAdminCrearDTO;
 import com.boxing.api.controller.dto.UsuarioRegistroDTO;
-import com.boxing.api.model.Usuario;
+import com.boxing.api.controller.dto.UsuarioResponseDTO;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
 public interface UsuarioService extends UserDetailsService {
 
-    Usuario registrarBoxeador(UsuarioRegistroDTO dto);
+    UsuarioResponseDTO registrarBoxeador(UsuarioRegistroDTO dto);
 
-    Usuario crearUsuarioPorAdmin(UsuarioAdminCrearDTO dto);
+    UsuarioResponseDTO crearUsuarioPorAdmin(UsuarioAdminCrearDTO dto);
 
-    List<Usuario> obtenerTodos();
+    List<UsuarioResponseDTO> obtenerTodos();
 }
