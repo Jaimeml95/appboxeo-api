@@ -3,6 +3,7 @@ package com.boxing.api.exception;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -10,6 +11,13 @@ import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponseDTO> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponseDTO(HttpStatus.UNAUTHORIZED.value(), "Unauthorized", "Credenciales inválidas"));
+    }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ErrorResponseDTO> handleNoSuchElement(NoSuchElementException ex) {
