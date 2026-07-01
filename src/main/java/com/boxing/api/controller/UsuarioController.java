@@ -1,9 +1,14 @@
 package com.boxing.api.controller;
 
 import com.boxing.api.controller.dto.UsuarioAdminCrearDTO;
+import com.boxing.api.exception.ErrorResponseDTO;
 import com.boxing.api.model.Usuario;
 import com.boxing.api.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,12 +31,22 @@ public class UsuarioController {
     }
 
     @Operation(summary = "Crear usuario", description = "Crea un usuario con el rol especificado. Solo ADMIN.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Usuario creado"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Sin token o rol distinto de ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "409", description = "El email ya está registrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     @PostMapping
     public ResponseEntity<Usuario> crearUsuario(@Valid @RequestBody UsuarioAdminCrearDTO dto) {
         return new ResponseEntity<>(usuarioService.crearUsuarioPorAdmin(dto), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Listar usuarios", description = "Devuelve todos los usuarios registrados. Solo ADMIN.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "403", description = "Sin token o rol distinto de ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
     @GetMapping
     public ResponseEntity<List<Usuario>> listarUsuarios() {
         return ResponseEntity.ok(usuarioService.obtenerTodos());
