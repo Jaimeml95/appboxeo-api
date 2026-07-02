@@ -1,5 +1,6 @@
 package com.boxing.api.controller;
 
+import com.boxing.api.controller.dto.UsuarioActualizarDTO;
 import com.boxing.api.controller.dto.UsuarioAdminCrearDTO;
 import com.boxing.api.controller.dto.UsuarioResponseDTO;
 import com.boxing.api.exception.ErrorResponseDTO;
@@ -50,5 +51,40 @@ public class UsuarioController {
     @GetMapping
     public ResponseEntity<List<UsuarioResponseDTO>> listarUsuarios() {
         return ResponseEntity.ok(usuarioService.obtenerTodos());
+    }
+
+    @Operation(summary = "Obtener usuario", description = "Devuelve el detalle de un usuario. Solo ADMIN.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "403", description = "Sin token o rol distinto de ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> obtener(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.obtenerPorId(id));
+    }
+
+    @Operation(summary = "Actualizar usuario", description = "Actualiza el nombre y el rol de un usuario. Solo ADMIN.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuario actualizado"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Sin token o rol distinto de ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody UsuarioActualizarDTO dto) {
+        return ResponseEntity.ok(usuarioService.actualizar(id, dto));
+    }
+
+    @Operation(summary = "Eliminar usuario", description = "Elimina un usuario. Solo ADMIN.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Usuario eliminado"),
+            @ApiResponse(responseCode = "403", description = "Sin token o rol distinto de ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        usuarioService.eliminar(id);
+        return ResponseEntity.noContent().build();
     }
 }

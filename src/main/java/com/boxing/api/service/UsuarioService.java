@@ -1,5 +1,6 @@
 package com.boxing.api.service;
 
+import com.boxing.api.controller.dto.UsuarioActualizarDTO;
 import com.boxing.api.controller.dto.UsuarioAdminCrearDTO;
 import com.boxing.api.controller.dto.UsuarioRegistroDTO;
 import com.boxing.api.controller.dto.UsuarioResponseDTO;
@@ -14,4 +15,10 @@ public interface UsuarioService extends UserDetailsService {
     UsuarioResponseDTO crearUsuarioPorAdmin(UsuarioAdminCrearDTO dto);
 
     List<UsuarioResponseDTO> obtenerTodos();
+
+    UsuarioResponseDTO obtenerPorId(Long id);
+
+    UsuarioResponseDTO actualizar(Long id, UsuarioActualizarDTO dto);
+
+    void eliminar(Long id);
 }

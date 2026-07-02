@@ -1,5 +1,6 @@
 package com.boxing.api.service.implementation;
 
+import com.boxing.api.controller.dto.UsuarioActualizarDTO;
 import com.boxing.api.controller.dto.UsuarioAdminCrearDTO;
 import com.boxing.api.controller.dto.UsuarioRegistroDTO;
 import com.boxing.api.controller.dto.UsuarioResponseDTO;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -54,9 +56,35 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public UsuarioResponseDTO obtenerPorId(Long id) {
+        return toResponse(findUsuarioById(id));
+    }
+
+    @Override
+    @Transactional
+    public UsuarioResponseDTO actualizar(Long id, UsuarioActualizarDTO dto) {
+        Usuario usuario = findUsuarioById(id);
+        usuario.setNombre(dto.nombre());
+        usuario.setRol(dto.rol());
+        return toResponse(usuarioRepository.save(usuario));
+    }
+
+    @Override
+    @Transactional
+    public void eliminar(Long id) {
+        usuarioRepository.delete(findUsuarioById(id));
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
+    }
+
+    private Usuario findUsuarioById(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado"));
     }
 
     private UsuarioResponseDTO toResponse(Usuario u) {
