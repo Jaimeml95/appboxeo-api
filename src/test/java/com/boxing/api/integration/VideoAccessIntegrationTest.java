@@ -29,75 +29,75 @@ class VideoAccessIntegrationTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private String tokenAdmin;
-    private String tokenBoxeador;
+    private String adminToken;
+    private String boxerToken;
 
     @BeforeEach
-    void obtenerTokens() throws Exception {
-        tokenAdmin = login("admin@test.com", "adminpass123");
+    void getTokens() throws Exception {
+        adminToken = login("admin@test.com", "adminpass123");
 
-        // Registrar boxeador si no existe y obtener su token
-        Map<String, String> registro = Map.of(
-                "nombre", "Boxeador Access",
-                "email", "boxeador.access@example.com",
+        // Register a boxer if it doesn't exist yet and get its token
+        Map<String, String> registration = Map.of(
+                "name", "Access Boxer",
+                "email", "boxer.access@example.com",
                 "password", "password123"
         );
-        mockMvc.perform(post("/api/v1/auth/registro")
+        mockMvc.perform(post("/api/v1/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registro)));
+                .content(objectMapper.writeValueAsString(registration)));
 
-        tokenBoxeador = login("boxeador.access@example.com", "password123");
+        boxerToken = login("boxer.access@example.com", "password123");
     }
 
     @Test
-    void getVideos_sinToken_devuelve403() throws Exception {
+    void getVideos_withoutToken_returns403() throws Exception {
         mockMvc.perform(get("/api/v1/videos"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void getVideos_conTokenBoxeador_devuelve200() throws Exception {
+    void getVideos_withBoxerToken_returns200() throws Exception {
         mockMvc.perform(get("/api/v1/videos")
-                        .header("Authorization", "Bearer " + tokenBoxeador))
+                        .header("Authorization", "Bearer " + boxerToken))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void getVideos_conTokenAdmin_devuelve200() throws Exception {
+    void getVideos_withAdminToken_returns200() throws Exception {
         mockMvc.perform(get("/api/v1/videos")
-                        .header("Authorization", "Bearer " + tokenAdmin))
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void postVideo_conTokenBoxeador_devuelve403() throws Exception {
+    void postVideo_withBoxerToken_returns403() throws Exception {
         Map<String, String> video = Map.of(
-                "titulo", "Video prohibido",
-                "descripcion", "No debería crearse",
-                "tipo", "YOUTUBE",
+                "title", "Forbidden Video",
+                "description", "Should not be created",
+                "type", "YOUTUBE",
                 "url", "https://youtube.com/watch?v=test",
-                "categoria", "TECNICA"
+                "category", "TECHNIQUE"
         );
 
         mockMvc.perform(post("/api/v1/videos")
-                        .header("Authorization", "Bearer " + tokenBoxeador)
+                        .header("Authorization", "Bearer " + boxerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(video)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void postVideo_conTokenAdmin_devuelve201() throws Exception {
+    void postVideo_withAdminToken_returns201() throws Exception {
         Map<String, String> video = Map.of(
-                "titulo", "Video Admin",
-                "descripcion", "Creado por admin",
-                "tipo", "YOUTUBE",
+                "title", "Admin Video",
+                "description", "Created by admin",
+                "type", "YOUTUBE",
                 "url", "https://youtube.com/watch?v=admin",
-                "categoria", "TECNICA"
+                "category", "TECHNIQUE"
         );
 
         mockMvc.perform(post("/api/v1/videos")
-                        .header("Authorization", "Bearer " + tokenAdmin)
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(video)))
                 .andExpect(status().isCreated());

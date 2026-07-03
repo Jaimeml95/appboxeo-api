@@ -1,43 +1,43 @@
 package com.boxing.api.controller.dto;
 
-import com.boxing.api.model.CategoriaVideo;
-import com.boxing.api.model.TipoVideo;
+import com.boxing.api.model.VideoCategory;
+import com.boxing.api.model.VideoType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class VideoRequestDTO {
 
-    @NotBlank(message = "El título no puede estar vacío")
-    @Size(max = 255, message = "El título no puede superar los 255 caracteres")
-    private String titulo;
+    @NotBlank(message = "Title must not be blank")
+    @Size(max = 255, message = "Title must not exceed 255 characters")
+    private String title;
 
-    private String descripcion;
+    private String description;
 
-    @NotNull(message = "El tipo no puede ser nulo")
-    private TipoVideo tipo;
+    @NotNull(message = "Type must not be null")
+    private VideoType type;
 
-    @NotBlank(message = "La URL no puede estar vacía")
-    @Size(max = 500, message = "La URL no puede superar los 500 caracteres")
+    @NotBlank(message = "URL must not be blank")
+    @Size(max = 500, message = "URL must not exceed 500 characters")
     private String url;
 
-    @NotNull(message = "La categoría no puede ser nula")
-    private CategoriaVideo categoria;
+    @NotNull(message = "Category must not be null")
+    private VideoCategory category;
 
     public VideoRequestDTO() {}
 
-    public String getTitulo() { return titulo; }
-    public void setTitulo(String titulo) { this.titulo = titulo; }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public TipoVideo getTipo() { return tipo; }
-    public void setTipo(TipoVideo tipo) { this.tipo = tipo; }
+    public VideoType getType() { return type; }
+    public void setType(VideoType type) { this.type = type; }
 
     public String getUrl() { return url; }
     public void setUrl(String url) { this.url = url; }
 
-    public CategoriaVideo getCategoria() { return categoria; }
-    public void setCategoria(CategoriaVideo categoria) { this.categoria = categoria; }
+    public VideoCategory getCategory() { return category; }
+    public void setCategory(VideoCategory category) { this.category = category; }
 }

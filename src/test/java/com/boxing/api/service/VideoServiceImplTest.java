@@ -2,8 +2,8 @@ package com.boxing.api.service;
 
 import com.boxing.api.controller.dto.VideoRequestDTO;
 import com.boxing.api.controller.dto.VideoResponseDTO;
-import com.boxing.api.model.CategoriaVideo;
-import com.boxing.api.model.TipoVideo;
+import com.boxing.api.model.VideoCategory;
+import com.boxing.api.model.VideoType;
 import com.boxing.api.model.Video;
 import com.boxing.api.repository.VideoRepository;
 import com.boxing.api.service.implementation.VideoServiceImpl;
@@ -37,111 +37,111 @@ class VideoServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        video = new Video("Jab cruzado", "Técnica básica de jab", TipoVideo.YOUTUBE, "https://youtube.com/watch?v=abc", CategoriaVideo.TECNICA);
+        video = new Video("Jab Cross", "Basic jab technique", VideoType.YOUTUBE, "https://youtube.com/watch?v=abc", VideoCategory.TECHNIQUE);
         video.setId(1L);
 
         requestDTO = new VideoRequestDTO();
-        requestDTO.setTitulo("Jab cruzado");
-        requestDTO.setDescripcion("Técnica básica de jab");
-        requestDTO.setTipo(TipoVideo.YOUTUBE);
+        requestDTO.setTitle("Jab Cross");
+        requestDTO.setDescription("Basic jab technique");
+        requestDTO.setType(VideoType.YOUTUBE);
         requestDTO.setUrl("https://youtube.com/watch?v=abc");
-        requestDTO.setCategoria(CategoriaVideo.TECNICA);
+        requestDTO.setCategory(VideoCategory.TECHNIQUE);
     }
 
     @Test
-    void obtenerTodos_devuelveListaDeVideos() {
+    void getAll_returnsListOfVideos() {
         when(videoRepository.findAll()).thenReturn(List.of(video));
 
-        List<VideoResponseDTO> resultado = videoService.obtenerTodos();
+        List<VideoResponseDTO> result = videoService.getAll();
 
-        assertThat(resultado).hasSize(1);
-        assertThat(resultado.get(0).getTitulo()).isEqualTo("Jab cruzado");
-        assertThat(resultado.get(0).getCategoria()).isEqualTo(CategoriaVideo.TECNICA);
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitle()).isEqualTo("Jab Cross");
+        assertThat(result.get(0).getCategory()).isEqualTo(VideoCategory.TECHNIQUE);
     }
 
     @Test
-    void obtenerTodos_listaVacia_devuelveListaVacia() {
+    void getAll_emptyList_returnsEmptyList() {
         when(videoRepository.findAll()).thenReturn(List.of());
 
-        List<VideoResponseDTO> resultado = videoService.obtenerTodos();
+        List<VideoResponseDTO> result = videoService.getAll();
 
-        assertThat(resultado).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void obtenerPorId_existente_devuelveVideo() {
+    void getById_existing_returnsVideo() {
         when(videoRepository.findById(1L)).thenReturn(Optional.of(video));
 
-        VideoResponseDTO resultado = videoService.obtenerPorId(1L);
+        VideoResponseDTO result = videoService.getById(1L);
 
-        assertThat(resultado.getId()).isEqualTo(1L);
-        assertThat(resultado.getTitulo()).isEqualTo("Jab cruzado");
-        assertThat(resultado.getTipo()).isEqualTo(TipoVideo.YOUTUBE);
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getTitle()).isEqualTo("Jab Cross");
+        assertThat(result.getType()).isEqualTo(VideoType.YOUTUBE);
     }
 
     @Test
-    void obtenerPorId_noExistente_lanzaExcepcion() {
+    void getById_nonExisting_throwsException() {
         when(videoRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> videoService.obtenerPorId(99L))
+        assertThatThrownBy(() -> videoService.getById(99L))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessage("Video no encontrado");
+                .hasMessage("Video not found");
     }
 
     @Test
-    void crear_guardaYDevuelveVideo() {
+    void create_savesAndReturnsVideo() {
         when(videoRepository.save(any(Video.class))).thenReturn(video);
 
-        VideoResponseDTO resultado = videoService.crear(requestDTO);
+        VideoResponseDTO result = videoService.create(requestDTO);
 
-        assertThat(resultado.getTitulo()).isEqualTo("Jab cruzado");
-        assertThat(resultado.getUrl()).isEqualTo("https://youtube.com/watch?v=abc");
+        assertThat(result.getTitle()).isEqualTo("Jab Cross");
+        assertThat(result.getUrl()).isEqualTo("https://youtube.com/watch?v=abc");
         verify(videoRepository, times(1)).save(any(Video.class));
     }
 
     @Test
-    void actualizar_existente_actualizaCampos() {
-        VideoRequestDTO dtoActualizado = new VideoRequestDTO();
-        dtoActualizado.setTitulo("Uppercut");
-        dtoActualizado.setDescripcion("Golpe ascendente");
-        dtoActualizado.setTipo(TipoVideo.PROPIO);
-        dtoActualizado.setUrl("https://miservidor.com/uppercut.mp4");
-        dtoActualizado.setCategoria(CategoriaVideo.FUERZA);
+    void update_existing_updatesFields() {
+        VideoRequestDTO updatedDTO = new VideoRequestDTO();
+        updatedDTO.setTitle("Uppercut");
+        updatedDTO.setDescription("Upward strike");
+        updatedDTO.setType(VideoType.OWN);
+        updatedDTO.setUrl("https://myserver.com/uppercut.mp4");
+        updatedDTO.setCategory(VideoCategory.STRENGTH);
 
         when(videoRepository.findById(1L)).thenReturn(Optional.of(video));
         when(videoRepository.save(any(Video.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        VideoResponseDTO resultado = videoService.actualizar(1L, dtoActualizado);
+        VideoResponseDTO result = videoService.update(1L, updatedDTO);
 
-        assertThat(resultado.getTitulo()).isEqualTo("Uppercut");
-        assertThat(resultado.getTipo()).isEqualTo(TipoVideo.PROPIO);
-        assertThat(resultado.getCategoria()).isEqualTo(CategoriaVideo.FUERZA);
+        assertThat(result.getTitle()).isEqualTo("Uppercut");
+        assertThat(result.getType()).isEqualTo(VideoType.OWN);
+        assertThat(result.getCategory()).isEqualTo(VideoCategory.STRENGTH);
     }
 
     @Test
-    void actualizar_noExistente_lanzaExcepcion() {
+    void update_nonExisting_throwsException() {
         when(videoRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> videoService.actualizar(99L, requestDTO))
+        assertThatThrownBy(() -> videoService.update(99L, requestDTO))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessage("Video no encontrado");
+                .hasMessage("Video not found");
     }
 
     @Test
-    void eliminar_existente_eliminaVideo() {
+    void delete_existing_deletesVideo() {
         when(videoRepository.findById(1L)).thenReturn(Optional.of(video));
 
-        videoService.eliminar(1L);
+        videoService.delete(1L);
 
         verify(videoRepository, times(1)).delete(video);
     }
 
     @Test
-    void eliminar_noExistente_lanzaExcepcion() {
+    void delete_nonExisting_throwsException() {
         when(videoRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> videoService.eliminar(99L))
+        assertThatThrownBy(() -> videoService.delete(99L))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessage("Video no encontrado");
+                .hasMessage("Video not found");
     }
 }

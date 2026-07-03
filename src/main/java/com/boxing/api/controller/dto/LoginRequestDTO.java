@@ -4,10 +4,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public record LoginRequestDTO(
-        @NotBlank(message = "El email no puede estar vacío")
-        @Email(message = "El formato del email no es válido")
+        @NotBlank(message = "Email must not be blank")
+        @Email(message = "Email format is invalid")
         String email,
 
-        @NotBlank(message = "La contraseña no puede estar vacía")
+        @NotBlank(message = "Password must not be blank")
         String password
 ) {}

@@ -1,12 +1,11 @@
 package com.boxing.api.controller;
 
 import com.boxing.api.config.SecurityConfig;
-import com.boxing.api.controller.dto.VideoRequestDTO;
-import com.boxing.api.controller.dto.VideoResponseDTO;
-import com.boxing.api.model.VideoCategory;
-import com.boxing.api.model.VideoType;
+import com.boxing.api.controller.dto.WorkoutRequestDTO;
+import com.boxing.api.controller.dto.WorkoutResponseDTO;
+import com.boxing.api.model.Difficulty;
+import com.boxing.api.service.WorkoutService;
 import com.boxing.api.service.JwtService;
-import com.boxing.api.service.VideoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,9 +29,9 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(VideoController.class)
+@WebMvcTest(WorkoutController.class)
 @Import(SecurityConfig.class)
-class VideoControllerTest {
+class WorkoutControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,7 +39,7 @@ class VideoControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean
-    private VideoService videoService;
+    private WorkoutService workoutService;
 
     @MockitoBean
     private JwtService jwtService;
@@ -48,52 +47,51 @@ class VideoControllerTest {
     @MockitoBean
     private UserDetailsService userDetailsService;
 
-    private VideoResponseDTO responseDTO;
-    private VideoRequestDTO requestDTO;
+    private WorkoutResponseDTO responseDTO;
+    private WorkoutRequestDTO requestDTO;
 
     @BeforeEach
     void setUp() {
-        responseDTO = new VideoResponseDTO(1L, "Jab Cross", "Basic technique", VideoType.YOUTUBE, "https://youtube.com/watch?v=abc", VideoCategory.TECHNIQUE);
+        responseDTO = new WorkoutResponseDTO(1L, "Basic Boxing", "Beginner introduction workout", Difficulty.BEGINNER, 45, List.of());
 
-        requestDTO = new VideoRequestDTO();
-        requestDTO.setTitle("Jab Cross");
-        requestDTO.setDescription("Basic technique");
-        requestDTO.setType(VideoType.YOUTUBE);
-        requestDTO.setUrl("https://youtube.com/watch?v=abc");
-        requestDTO.setCategory(VideoCategory.TECHNIQUE);
+        requestDTO = new WorkoutRequestDTO();
+        requestDTO.setName("Basic Boxing");
+        requestDTO.setDescription("Beginner introduction workout");
+        requestDTO.setDifficulty(Difficulty.BEGINNER);
+        requestDTO.setEstimatedDuration(45);
     }
 
     @Test
     void list_returnsListAndStatus200() throws Exception {
-        when(videoService.getAll()).thenReturn(List.of(responseDTO));
+        when(workoutService.getAll()).thenReturn(List.of(responseDTO));
 
-        mockMvc.perform(get("/api/v1/videos").with(user("test").roles("USER")))
+        mockMvc.perform(get("/api/v1/workouts").with(user("test").roles("USER")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Jab Cross"))
-                .andExpect(jsonPath("$[0].category").value("TECHNIQUE"));
+                .andExpect(jsonPath("$[0].name").value("Basic Boxing"))
+                .andExpect(jsonPath("$[0].difficulty").value("BEGINNER"));
     }
 
     @Test
-    void get_existingId_returnsVideoAndStatus200() throws Exception {
-        when(videoService.getById(1L)).thenReturn(responseDTO);
+    void get_existingId_returnsWorkoutAndStatus200() throws Exception {
+        when(workoutService.getById(1L)).thenReturn(responseDTO);
 
-        mockMvc.perform(get("/api/v1/videos/1").with(user("test").roles("USER")))
+        mockMvc.perform(get("/api/v1/workouts/1").with(user("test").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.title").value("Jab Cross"));
+                .andExpect(jsonPath("$.name").value("Basic Boxing"));
     }
 
     @Test
     void get_nonExistingId_returnsStatus404() throws Exception {
-        when(videoService.getById(99L)).thenThrow(new NoSuchElementException("Video not found"));
+        when(workoutService.getById(99L)).thenThrow(new NoSuchElementException("Workout not found"));
 
-        mockMvc.perform(get("/api/v1/videos/99").with(user("test").roles("USER")))
+        mockMvc.perform(get("/api/v1/workouts/99").with(user("test").roles("USER")))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void create_withoutAdminRole_returnsStatus403() throws Exception {
-        mockMvc.perform(post("/api/v1/videos")
+        mockMvc.perform(post("/api/v1/workouts")
                         .with(user("test").roles("BOXER"))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -103,9 +101,9 @@ class VideoControllerTest {
 
     @Test
     void create_invalidBody_returnsStatus400() throws Exception {
-        VideoRequestDTO invalid = new VideoRequestDTO();
+        WorkoutRequestDTO invalid = new WorkoutRequestDTO();
 
-        mockMvc.perform(post("/api/v1/videos")
+        mockMvc.perform(post("/api/v1/workouts")
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -114,23 +112,23 @@ class VideoControllerTest {
     }
 
     @Test
-    void create_valid_returnsVideoAndStatus201() throws Exception {
-        when(videoService.create(any(VideoRequestDTO.class))).thenReturn(responseDTO);
+    void create_valid_returnsWorkoutAndStatus201() throws Exception {
+        when(workoutService.create(any(WorkoutRequestDTO.class))).thenReturn(responseDTO);
 
-        mockMvc.perform(post("/api/v1/videos")
+        mockMvc.perform(post("/api/v1/workouts")
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("Jab Cross"));
+                .andExpect(jsonPath("$.name").value("Basic Boxing"));
     }
 
     @Test
     void delete_valid_returnsStatus204() throws Exception {
-        doNothing().when(videoService).delete(1L);
+        doNothing().when(workoutService).delete(1L);
 
-        mockMvc.perform(delete("/api/v1/videos/1")
+        mockMvc.perform(delete("/api/v1/workouts/1")
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
@@ -138,9 +136,9 @@ class VideoControllerTest {
 
     @Test
     void delete_nonExistingId_returnsStatus404() throws Exception {
-        doThrow(new NoSuchElementException("Video not found")).when(videoService).delete(99L);
+        doThrow(new NoSuchElementException("Workout not found")).when(workoutService).delete(99L);
 
-        mockMvc.perform(delete("/api/v1/videos/99")
+        mockMvc.perform(delete("/api/v1/workouts/99")
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf()))
                 .andExpect(status().isNotFound());

@@ -22,7 +22,7 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<VideoResponseDTO> obtenerTodos() {
+    public List<VideoResponseDTO> getAll() {
         return videoRepository.findAll()
                 .stream()
                 .map(this::toResponse)
@@ -31,41 +31,41 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     @Transactional(readOnly = true)
-    public VideoResponseDTO obtenerPorId(Long id) {
+    public VideoResponseDTO getById(Long id) {
         return toResponse(findVideoById(id));
     }
 
     @Override
     @Transactional
-    public VideoResponseDTO crear(VideoRequestDTO dto) {
-        Video video = new Video(dto.getTitulo(), dto.getDescripcion(), dto.getTipo(), dto.getUrl(), dto.getCategoria());
+    public VideoResponseDTO create(VideoRequestDTO dto) {
+        Video video = new Video(dto.getTitle(), dto.getDescription(), dto.getType(), dto.getUrl(), dto.getCategory());
         return toResponse(videoRepository.save(video));
     }
 
     @Override
     @Transactional
-    public VideoResponseDTO actualizar(Long id, VideoRequestDTO dto) {
+    public VideoResponseDTO update(Long id, VideoRequestDTO dto) {
         Video video = findVideoById(id);
-        video.setTitulo(dto.getTitulo());
-        video.setDescripcion(dto.getDescripcion());
-        video.setTipo(dto.getTipo());
+        video.setTitle(dto.getTitle());
+        video.setDescription(dto.getDescription());
+        video.setType(dto.getType());
         video.setUrl(dto.getUrl());
-        video.setCategoria(dto.getCategoria());
+        video.setCategory(dto.getCategory());
         return toResponse(videoRepository.save(video));
     }
 
     @Override
     @Transactional
-    public void eliminar(Long id) {
+    public void delete(Long id) {
         videoRepository.delete(findVideoById(id));
     }
 
     private Video findVideoById(Long id) {
         return videoRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Video no encontrado"));
+                .orElseThrow(() -> new NoSuchElementException("Video not found"));
     }
 
     private VideoResponseDTO toResponse(Video v) {
-        return new VideoResponseDTO(v.getId(), v.getTitulo(), v.getDescripcion(), v.getTipo(), v.getUrl(), v.getCategoria());
+        return new VideoResponseDTO(v.getId(), v.getTitle(), v.getDescription(), v.getType(), v.getUrl(), v.getCategory());
     }
 }

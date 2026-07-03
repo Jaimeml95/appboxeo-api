@@ -1,8 +1,8 @@
 package com.boxing.api.config;
 
-import com.boxing.api.model.Rol;
-import com.boxing.api.model.Usuario;
-import com.boxing.api.repository.UsuarioRepository;
+import com.boxing.api.model.Role;
+import com.boxing.api.model.User;
+import com.boxing.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataInitializer implements ApplicationRunner {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${admin.email}")
@@ -21,20 +21,20 @@ public class DataInitializer implements ApplicationRunner {
     @Value("${admin.password}")
     private String adminPassword;
 
-    public DataInitializer(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
-        this.usuarioRepository = usuarioRepository;
+    public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(ApplicationArguments args) {
-        if (usuarioRepository.findByEmail(adminEmail).isEmpty()) {
-            Usuario admin = new Usuario();
-            admin.setNombre("Admin");
+        if (userRepository.findByEmail(adminEmail).isEmpty()) {
+            User admin = new User();
+            admin.setName("Admin");
             admin.setEmail(adminEmail);
             admin.setPassword(passwordEncoder.encode(adminPassword));
-            admin.setRol(Rol.ADMIN);
-            usuarioRepository.save(admin);
+            admin.setRole(Role.ADMIN);
+            userRepository.save(admin);
         }
     }
 }

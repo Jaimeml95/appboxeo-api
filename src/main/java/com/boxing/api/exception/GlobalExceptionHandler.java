@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponseDTO(HttpStatus.UNAUTHORIZED.value(), "Unauthorized", "Credenciales inválidas"));
+                .body(new ErrorResponseDTO(HttpStatus.UNAUTHORIZED.value(), "Unauthorized", "Invalid credentials"));
     }
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -37,6 +37,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(new ErrorResponseDTO(HttpStatus.CONFLICT.value(), "Conflict", "El recurso ya existe en la base de datos"));
+                .body(new ErrorResponseDTO(HttpStatus.CONFLICT.value(), "Conflict", "The resource already exists in the database"));
     }
 }

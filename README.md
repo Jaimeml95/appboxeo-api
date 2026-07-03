@@ -27,10 +27,10 @@ A backend REST API for a boxing training management app. Admins manage content (
 
 ## What it does
 
-- **Auth**: public registration (default `BOXEADOR` role), JWT-based login.
+- **Auth**: public registration (default `BOXER` role), JWT-based login.
 - **Users**: admin-only creation with configurable role, listing, retrieval, update, deletion.
 - **Videos**: training content (technique, strength, cardio, nutrition; YouTube or self-hosted), admin-managed.
-- **Workouts** (`Entrenamiento`): full CRUD with nested `Ejercicio` sub-resources (sets, difficulty level: beginner/intermediate/advanced).
+- **Workouts** (`Workout`): full CRUD with nested `Exercise` sub-resources (sets, difficulty level: beginner/intermediate/advanced).
 - **Timer configurations**: CRUD scoped to the authenticated user — each boxer only sees and manages their own.
 
 ## Tech stack
@@ -51,20 +51,20 @@ A backend REST API for a boxing training management app. Admins manage content (
 Classic layered design: `Controller → Service → Repository → Entity`, with request/response DTOs kept fully separate from JPA entities — entities are never exposed directly through the API.
 
 **Main entities:**
-- `Usuario` — implements Spring Security's `UserDetails`, roles `BOXEADOR` / `ADMIN`
+- `User` — implements Spring Security's `UserDetails`, roles `BOXER` / `ADMIN`
 - `Video` — training content (type: YouTube / own video)
-- `Entrenamiento` with nested `Ejercicio` — workout routines with sets and difficulty
-- `ConfiguracionCronometro` — per-user workout timer settings
+- `Workout` with nested `Exercise` — workout routines with sets and difficulty
+- `TimerConfiguration` — per-user workout timer settings
 
 Errors are handled centrally via `@RestControllerAdvice` (`GlobalExceptionHandler`), returning semantically correct HTTP codes (401 invalid credentials, 403 forbidden, 404 not found, 409 conflict/duplicate, 400 validation).
 
 ## Security
 
 - **Authentication**: JWT — login returns a signed token, sent as a Bearer token on every protected request.
-- **Authorization**: two layers — global route rules in `SecurityConfig` (e.g. `/api/v1/usuarios/**` restricted to `ADMIN`, `/api/v1/cronometro/**` open to `BOXEADOR` or `ADMIN`) plus method-level `@PreAuthorize` on write operations (create/edit/delete restricted to `ADMIN`).
+- **Authorization**: two layers — global route rules in `SecurityConfig` (e.g. `/api/v1/users/**` restricted to `ADMIN`, `/api/v1/timer-configurations/**` open to `BOXER` or `ADMIN`) plus method-level `@PreAuthorize` on write operations (create/edit/delete restricted to `ADMIN`).
 - **Input validation**: Bean Validation (`@Valid`, `@NotBlank`, `@Email`, `@Size`, etc.) on every request DTO.
 
-**A real vulnerability found and fixed during development:** the registration and user-management endpoints originally returned the `Usuario` entity directly as JSON, leaking the bcrypt password hash and other internal Spring Security fields. Fixed by introducing a dedicated `UsuarioResponseDTO` that exposes only safe fields. Controller tests now explicitly assert that sensitive fields never appear in any response.
+**A real vulnerability found and fixed during development:** the registration and user-management endpoints originally returned the `User` entity directly as JSON, leaking the bcrypt password hash and other internal Spring Security fields. Fixed by introducing a dedicated `UserResponseDTO` that exposes only safe fields. Controller tests now explicitly assert that sensitive fields never appear in any response.
 
 > When deployed, the JWT secret used in production is generated fresh and kept exclusive to that environment (e.g. `openssl rand -base64 32`) — it is never the placeholder value committed in `.env.example`.
 
@@ -100,13 +100,13 @@ Full interactive documentation is available via Swagger/OpenAPI once the app is 
 
 | Resource | Access |
 |---|---|
-| `POST /api/v1/auth/registro` | Public |
+| `POST /api/v1/auth/register` | Public |
 | `POST /api/v1/auth/login` | Public |
-| `GET/POST/PUT/DELETE /api/v1/usuarios/**` | `ADMIN` |
+| `GET/POST/PUT/DELETE /api/v1/users/**` | `ADMIN` |
 | `GET /api/v1/videos` | Authenticated |
 | `POST/PUT/DELETE /api/v1/videos` | `ADMIN` |
-| `/api/v1/entrenamientos/**` incl. `/{id}/ejercicios` | Authenticated (writes: `ADMIN`) |
-| `/api/v1/cronometro/**` | Owner (`BOXEADOR`) or `ADMIN` |
+| `/api/v1/workouts/**` incl. `/{id}/exercises` | Authenticated (writes: `ADMIN`) |
+| `/api/v1/timer-configurations/**` | Owner (`BOXER`) or `ADMIN` |
 
 ## CI/CD
 

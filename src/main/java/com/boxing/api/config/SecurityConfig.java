@@ -35,9 +35,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
-                .requestMatchers("/api/v1/cronometro/**").hasAnyRole("BOXEADOR", "ADMIN")
-                .requestMatchers("/api/v1/entrenamientos/**").authenticated()
+                .requestMatchers("/api/v1/users/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/timer-configurations/**").hasAnyRole("BOXER", "ADMIN")
+                .requestMatchers("/api/v1/workouts/**").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

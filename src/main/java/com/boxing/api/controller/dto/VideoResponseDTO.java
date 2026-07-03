@@ -1,43 +1,43 @@
 package com.boxing.api.controller.dto;
 
-import com.boxing.api.model.CategoriaVideo;
-import com.boxing.api.model.TipoVideo;
+import com.boxing.api.model.VideoCategory;
+import com.boxing.api.model.VideoType;
 
 public class VideoResponseDTO {
 
     private Long id;
-    private String titulo;
-    private String descripcion;
-    private TipoVideo tipo;
+    private String title;
+    private String description;
+    private VideoType type;
     private String url;
-    private CategoriaVideo categoria;
+    private VideoCategory category;
 
     public VideoResponseDTO() {}
 
-    public VideoResponseDTO(Long id, String titulo, String descripcion, TipoVideo tipo, String url, CategoriaVideo categoria) {
+    public VideoResponseDTO(Long id, String title, String description, VideoType type, String url, VideoCategory category) {
         this.id = id;
-        this.titulo = titulo;
-        this.descripcion = descripcion;
-        this.tipo = tipo;
+        this.title = title;
+        this.description = description;
+        this.type = type;
         this.url = url;
-        this.categoria = categoria;
+        this.category = category;
     }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getTitulo() { return titulo; }
-    public void setTitulo(String titulo) { this.titulo = titulo; }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public TipoVideo getTipo() { return tipo; }
-    public void setTipo(TipoVideo tipo) { this.tipo = tipo; }
+    public VideoType getType() { return type; }
+    public void setType(VideoType type) { this.type = type; }
 
     public String getUrl() { return url; }
     public void setUrl(String url) { this.url = url; }
 
-    public CategoriaVideo getCategoria() { return categoria; }
-    public void setCategoria(CategoriaVideo categoria) { this.categoria = categoria; }
+    public VideoCategory getCategory() { return category; }
+    public void setCategory(VideoCategory category) { this.category = category; }
 }

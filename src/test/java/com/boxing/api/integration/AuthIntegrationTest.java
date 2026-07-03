@@ -27,24 +27,24 @@ class AuthIntegrationTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    void registro_devuelve201_yDatosDelUsuario() throws Exception {
+    void register_returns201_andUserData() throws Exception {
         Map<String, String> body = Map.of(
-                "nombre", "Boxeador Test",
-                "email", "boxeador.test@example.com",
+                "name", "Test Boxer",
+                "email", "test.boxer@example.com",
                 "password", "password123"
         );
 
-        mockMvc.perform(post("/api/v1/auth/registro")
+        mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value("boxeador.test@example.com"))
-                .andExpect(jsonPath("$.nombre").value("Boxeador Test"))
-                .andExpect(jsonPath("$.rol").value("BOXEADOR"));
+                .andExpect(jsonPath("$.email").value("test.boxer@example.com"))
+                .andExpect(jsonPath("$.name").value("Test Boxer"))
+                .andExpect(jsonPath("$.role").value("BOXER"));
     }
 
     @Test
-    void login_conCredencialesValidas_devuelve200_yJwt() throws Exception {
+    void login_withValidCredentials_returns200_andJwt() throws Exception {
         Map<String, String> body = Map.of(
                 "email", "admin@test.com",
                 "password", "adminpass123"
@@ -59,10 +59,10 @@ class AuthIntegrationTest {
     }
 
     @Test
-    void login_conCredencialesInvalidas_devuelve401() throws Exception {
+    void login_withInvalidCredentials_returns401() throws Exception {
         Map<String, String> body = Map.of(
                 "email", "admin@test.com",
-                "password", "contraseña_incorrecta"
+                "password", "wrong_password"
         );
 
         mockMvc.perform(post("/api/v1/auth/login")

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "Videos", description = "Gestión de videos")
+@Tag(name = "Videos", description = "Video management")
 @SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/v1/videos")
@@ -31,62 +31,62 @@ public class VideoController {
         this.videoService = videoService;
     }
 
-    @Operation(summary = "Listar videos", description = "Devuelve todos los videos.")
+    @Operation(summary = "List videos", description = "Returns all videos.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "403", description = "Sin token o sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "403", description = "Missing token or insufficient permissions", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping
-    public ResponseEntity<List<VideoResponseDTO>> listar() {
-        return ResponseEntity.ok(videoService.obtenerTodos());
+    public ResponseEntity<List<VideoResponseDTO>> list() {
+        return ResponseEntity.ok(videoService.getAll());
     }
 
-    @Operation(summary = "Obtener video", description = "Devuelve el detalle de un video.")
+    @Operation(summary = "Get video", description = "Returns the detail of a video.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "403", description = "Sin token o sin permisos", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Video no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "403", description = "Missing token or insufficient permissions", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Video not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<VideoResponseDTO> obtener(@PathVariable Long id) {
-        return ResponseEntity.ok(videoService.obtenerPorId(id));
+    public ResponseEntity<VideoResponseDTO> get(@PathVariable Long id) {
+        return ResponseEntity.ok(videoService.getById(id));
     }
 
-    @Operation(summary = "Crear video", description = "Crea un nuevo video. Solo ADMIN.")
+    @Operation(summary = "Create video", description = "Creates a new video. ADMIN only.")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Video creado"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "403", description = "Sin token o rol distinto de ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "201", description = "Video created"),
+            @ApiResponse(responseCode = "400", description = "Invalid data", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Missing token or role other than ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<VideoResponseDTO> crear(@Valid @RequestBody VideoRequestDTO dto) {
-        return new ResponseEntity<>(videoService.crear(dto), HttpStatus.CREATED);
+    public ResponseEntity<VideoResponseDTO> create(@Valid @RequestBody VideoRequestDTO dto) {
+        return new ResponseEntity<>(videoService.create(dto), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Actualizar video", description = "Actualiza un video existente. Solo ADMIN.")
+    @Operation(summary = "Update video", description = "Updates an existing video. ADMIN only.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Video actualizado"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "403", description = "Sin token o rol distinto de ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Video no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "200", description = "Video updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid data", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Missing token or role other than ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Video not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<VideoResponseDTO> actualizar(@PathVariable Long id, @Valid @RequestBody VideoRequestDTO dto) {
-        return ResponseEntity.ok(videoService.actualizar(id, dto));
+    public ResponseEntity<VideoResponseDTO> update(@PathVariable Long id, @Valid @RequestBody VideoRequestDTO dto) {
+        return ResponseEntity.ok(videoService.update(id, dto));
     }
 
-    @Operation(summary = "Eliminar video", description = "Elimina un video. Solo ADMIN.")
+    @Operation(summary = "Delete video", description = "Deletes a video. ADMIN only.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Video eliminado"),
-            @ApiResponse(responseCode = "403", description = "Sin token o rol distinto de ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Video no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "204", description = "Video deleted"),
+            @ApiResponse(responseCode = "403", description = "Missing token or role other than ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Video not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        videoService.eliminar(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        videoService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

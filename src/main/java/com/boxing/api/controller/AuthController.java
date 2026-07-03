@@ -2,11 +2,11 @@ package com.boxing.api.controller;
 
 import com.boxing.api.controller.dto.LoginRequestDTO;
 import com.boxing.api.controller.dto.LoginResponseDTO;
-import com.boxing.api.controller.dto.UsuarioRegistroDTO;
-import com.boxing.api.controller.dto.UsuarioResponseDTO;
+import com.boxing.api.controller.dto.UserRegistrationDTO;
+import com.boxing.api.controller.dto.UserResponseDTO;
 import com.boxing.api.exception.ErrorResponseDTO;
 import com.boxing.api.service.JwtService;
-import com.boxing.api.service.UsuarioService;
+import com.boxing.api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,45 +24,45 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Autenticación", description = "Registro público de boxeadores y login")
+@Tag(name = "Authentication", description = "Public registration for boxers and login")
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final UsuarioService usuarioService;
+    private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    public AuthController(UsuarioService usuarioService, AuthenticationManager authenticationManager, JwtService jwtService) {
-        this.usuarioService = usuarioService;
+    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtService jwtService) {
+        this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
     }
 
-    @Operation(summary = "Registro de boxeador", description = "Crea una cuenta pública con rol BOXEADOR.")
+    @Operation(summary = "Boxer registration", description = "Creates a public account with the BOXER role.")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Usuario creado"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "409", description = "El email ya está registrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "201", description = "User created"),
+            @ApiResponse(responseCode = "400", description = "Invalid data", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "409", description = "Email is already registered", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
-    @PostMapping("/registro")
-    public ResponseEntity<UsuarioResponseDTO> registro(@Valid @RequestBody UsuarioRegistroDTO dto) {
-        return new ResponseEntity<>(usuarioService.registrarBoxeador(dto), HttpStatus.CREATED);
+    @PostMapping("/register")
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRegistrationDTO dto) {
+        return new ResponseEntity<>(userService.register(dto), HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Login", description = "Devuelve un token JWT si las credenciales son correctas.")
+    @Operation(summary = "Login", description = "Returns a JWT token if the credentials are correct.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Login correcto"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "401", description = "Credenciales inválidas", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "200", description = "Login successful"),
+            @ApiResponse(responseCode = "400", description = "Invalid data", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.email(), dto.password())
         );
-        UserDetails userDetails = usuarioService.loadUserByUsername(dto.email());
-        String token = jwtService.generarToken(userDetails);
+        UserDetails userDetails = userService.loadUserByUsername(dto.email());
+        String token = jwtService.generateToken(userDetails);
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 }

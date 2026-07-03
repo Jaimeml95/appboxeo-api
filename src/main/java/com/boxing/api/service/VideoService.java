@@ -7,13 +7,13 @@ import java.util.List;
 
 public interface VideoService {
 
-    List<VideoResponseDTO> obtenerTodos();
+    List<VideoResponseDTO> getAll();
 
-    VideoResponseDTO obtenerPorId(Long id);
+    VideoResponseDTO getById(Long id);
 
-    VideoResponseDTO crear(VideoRequestDTO dto);
+    VideoResponseDTO create(VideoRequestDTO dto);
 
-    VideoResponseDTO actualizar(Long id, VideoRequestDTO dto);
+    VideoResponseDTO update(Long id, VideoRequestDTO dto);
 
-    void eliminar(Long id);
+    void delete(Long id);
 }
