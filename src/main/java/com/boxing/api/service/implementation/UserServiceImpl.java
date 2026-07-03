@@ -1,17 +1,13 @@
 package com.boxing.api.service.implementation;
 
 import com.boxing.api.controller.dto.UserUpdateDTO;
-import com.boxing.api.controller.dto.UserAdminCreateDTO;
-import com.boxing.api.controller.dto.UserRegistrationDTO;
 import com.boxing.api.controller.dto.UserResponseDTO;
-import com.boxing.api.exception.ResourceAlreadyExistsException;
 import com.boxing.api.model.Role;
 import com.boxing.api.model.User;
 import com.boxing.api.repository.UserRepository;
 import com.boxing.api.service.UserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,31 +18,16 @@ import java.util.NoSuchElementException;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     @Transactional
-    public UserResponseDTO register(UserRegistrationDTO dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new ResourceAlreadyExistsException("Email '" + dto.getEmail() + "' is already registered");
-        }
-        User user = new User(dto.getName(), dto.getEmail(), passwordEncoder.encode(dto.getPassword()), Role.BOXER);
-        return toResponse(userRepository.save(user));
-    }
-
-    @Override
-    @Transactional
-    public UserResponseDTO createUser(UserAdminCreateDTO dto) {
-        if (userRepository.existsByEmail(dto.email())) {
-            throw new ResourceAlreadyExistsException("Email '" + dto.email() + "' is already registered");
-        }
-        User user = new User(dto.name(), dto.email(), passwordEncoder.encode(dto.password()), dto.role());
-        return toResponse(userRepository.save(user));
+    public User findOrCreateByGoogle(String googleId, String email, String name) {
+        return userRepository.findByGoogleId(googleId)
+                .orElseGet(() -> userRepository.save(User.forGoogleSignIn(name, email, googleId, Role.BOXER)));
     }
 
     @Override

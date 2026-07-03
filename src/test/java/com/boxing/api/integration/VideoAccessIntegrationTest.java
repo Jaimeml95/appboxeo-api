@@ -1,5 +1,9 @@
 package com.boxing.api.integration;
 
+import com.boxing.api.model.Role;
+import com.boxing.api.model.User;
+import com.boxing.api.repository.UserRepository;
+import com.boxing.api.service.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +31,12 @@ class VideoAccessIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JwtService jwtService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private String adminToken;
@@ -36,17 +46,13 @@ class VideoAccessIntegrationTest {
     void getTokens() throws Exception {
         adminToken = login("admin@test.com", "adminpass123");
 
-        // Register a boxer if it doesn't exist yet and get its token
-        Map<String, String> registration = Map.of(
-                "name", "Access Boxer",
-                "email", "boxer.access@example.com",
-                "password", "password123"
-        );
-        mockMvc.perform(post("/api/v1/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registration)));
-
-        boxerToken = login("boxer.access@example.com", "password123");
+        // Boxers only ever exist via Google Sign-In, so a boxer test account is
+        // provisioned directly instead of going through an HTTP registration flow.
+        // find-or-create because @BeforeEach runs before every test in this class.
+        User boxer = userRepository.findByGoogleId("google-sub-access")
+                .orElseGet(() -> userRepository.save(
+                        User.forGoogleSignIn("Access Boxer", "boxer.access@example.com", "google-sub-access", Role.BOXER)));
+        boxerToken = jwtService.generateToken(boxer);
     }
 
     @Test

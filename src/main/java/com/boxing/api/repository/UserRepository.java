@@ -8,10 +8,10 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Query method used for login/registration lookups; Spring Data JPA
+    // Query method used for local login lookups; Spring Data JPA
     // implements it automatically from the method name.
     Optional<User> findByEmail(String email);
 
-    // Used to check whether an email is already registered before inserting a new one.
-    boolean existsByEmail(String email);
+    // Used to find or provision a user on Google Sign-In.
+    Optional<User> findByGoogleId(String googleId);
 }

@@ -2,7 +2,6 @@ package com.boxing.api.controller;
 
 import com.boxing.api.config.SecurityConfig;
 import com.boxing.api.controller.dto.UserUpdateDTO;
-import com.boxing.api.controller.dto.UserAdminCreateDTO;
 import com.boxing.api.controller.dto.UserResponseDTO;
 import com.boxing.api.model.Role;
 import com.boxing.api.service.JwtService;
@@ -47,12 +46,10 @@ class UserControllerTest {
     private JwtService jwtService;
 
     private UserResponseDTO responseDTO;
-    private UserAdminCreateDTO createDTO;
 
     @BeforeEach
     void setUp() {
         responseDTO = new UserResponseDTO(1L, "Test Boxer", "boxer@example.com", Role.BOXER, LocalDateTime.now());
-        createDTO = new UserAdminCreateDTO("Test Boxer", "boxer@example.com", "password123", Role.BOXER);
     }
 
     @Test
@@ -87,32 +84,6 @@ class UserControllerTest {
 
         mockMvc.perform(get("/api/v1/users/99").with(user("admin").roles("ADMIN")))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void createUser_invalidBody_returnsStatus400() throws Exception {
-        UserAdminCreateDTO invalid = new UserAdminCreateDTO("", "not-an-email", "123", null);
-
-        mockMvc.perform(post("/api/v1/users")
-                        .with(user("admin").roles("ADMIN"))
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalid)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void createUser_valid_returnsUserAndStatus201() throws Exception {
-        when(userService.createUser(any(UserAdminCreateDTO.class))).thenReturn(responseDTO);
-
-        mockMvc.perform(post("/api/v1/users")
-                        .with(user("admin").roles("ADMIN"))
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value("boxer@example.com"))
-                .andExpect(jsonPath("$.password").doesNotExist());
     }
 
     @Test

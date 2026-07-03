@@ -1,18 +1,17 @@
 package com.boxing.api.service;
 
 import com.boxing.api.controller.dto.UserUpdateDTO;
-import com.boxing.api.controller.dto.UserAdminCreateDTO;
-import com.boxing.api.controller.dto.UserRegistrationDTO;
 import com.boxing.api.controller.dto.UserResponseDTO;
+import com.boxing.api.model.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
 public interface UserService extends UserDetailsService {
 
-    UserResponseDTO register(UserRegistrationDTO dto);
-
-    UserResponseDTO createUser(UserAdminCreateDTO dto);
+    // Returns the entity (not a response DTO) because the caller needs it as
+    // UserDetails to issue a JWT right away.
+    User findOrCreateByGoogle(String googleId, String email, String name);
 
     List<UserResponseDTO> getAll();
 

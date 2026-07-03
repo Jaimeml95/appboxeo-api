@@ -30,8 +30,13 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(nullable = false)
+    // Null for accounts that only authenticate via Google — every account
+    // except the seeded local admin. See googleId below.
     private String password;
+
+    // Non-null only for accounts provisioned through Google Sign-In.
+    @Column(name = "google_id", unique = true)
+    private String googleId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -52,6 +57,12 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+
+    public static User forGoogleSignIn(String name, String email, String googleId, Role role) {
+        User user = new User(name, email, null, role);
+        user.googleId = googleId;
+        return user;
     }
 
     // UserDetails — Spring Security uses email as the identifier
@@ -81,6 +92,9 @@ public class User implements UserDetails {
     public void setEmail(String email) { this.email = email; }
 
     public void setPassword(String password) { this.password = password; }
+
+    public String getGoogleId() { return googleId; }
+    public void setGoogleId(String googleId) { this.googleId = googleId; }
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }

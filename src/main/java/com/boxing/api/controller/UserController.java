@@ -1,7 +1,6 @@
 package com.boxing.api.controller;
 
 import com.boxing.api.controller.dto.UserUpdateDTO;
-import com.boxing.api.controller.dto.UserAdminCreateDTO;
 import com.boxing.api.controller.dto.UserResponseDTO;
 import com.boxing.api.exception.ErrorResponseDTO;
 import com.boxing.api.service.UserService;
@@ -13,13 +12,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "Users", description = "User management — ADMIN only")
+@Tag(name = "Users", description = "User management — ADMIN only. Accounts are provisioned automatically on first Google Sign-In; this API only manages existing accounts.")
 @SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/v1/users")
@@ -29,18 +27,6 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
-    }
-
-    @Operation(summary = "Create user", description = "Creates a user with the specified role. ADMIN only.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "User created"),
-            @ApiResponse(responseCode = "400", description = "Invalid data", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "403", description = "Missing token or role other than ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "409", description = "Email is already registered", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
-    })
-    @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserAdminCreateDTO dto) {
-        return new ResponseEntity<>(userService.createUser(dto), HttpStatus.CREATED);
     }
 
     @Operation(summary = "List users", description = "Returns all registered users. ADMIN only.")

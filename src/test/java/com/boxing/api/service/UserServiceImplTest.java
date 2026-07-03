@@ -1,10 +1,7 @@
 package com.boxing.api.service;
 
 import com.boxing.api.controller.dto.UserUpdateDTO;
-import com.boxing.api.controller.dto.UserAdminCreateDTO;
-import com.boxing.api.controller.dto.UserRegistrationDTO;
 import com.boxing.api.controller.dto.UserResponseDTO;
-import com.boxing.api.exception.ResourceAlreadyExistsException;
 import com.boxing.api.model.Role;
 import com.boxing.api.model.User;
 import com.boxing.api.repository.UserRepository;
@@ -17,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,9 +30,6 @@ class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -49,53 +42,29 @@ class UserServiceImplTest {
     }
 
     @Test
-    void register_newEmail_createsUserWithBoxerRole() {
-        UserRegistrationDTO dto = new UserRegistrationDTO("Test Boxer", "boxer@example.com", "password123");
-        when(userRepository.existsByEmail("boxer@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("passwordHash");
-        when(userRepository.save(any(User.class))).thenReturn(user);
+    void findOrCreateByGoogle_newGoogleId_createsUserWithBoxerRole() {
+        User created = User.forGoogleSignIn("Test Boxer", "boxer@example.com", "google-sub-123", Role.BOXER);
+        created.setId(1L);
+        when(userRepository.findByGoogleId("google-sub-123")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenReturn(created);
 
-        UserResponseDTO result = userService.register(dto);
+        User result = userService.findOrCreateByGoogle("google-sub-123", "boxer@example.com", "Test Boxer");
 
         assertThat(result.getEmail()).isEqualTo("boxer@example.com");
         assertThat(result.getRole()).isEqualTo(Role.BOXER);
+        assertThat(result.getGoogleId()).isEqualTo("google-sub-123");
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
-    void register_emailAlreadyExists_throwsException() {
-        UserRegistrationDTO dto = new UserRegistrationDTO("Test Boxer", "boxer@example.com", "password123");
-        when(userRepository.existsByEmail("boxer@example.com")).thenReturn(true);
+    void findOrCreateByGoogle_existingGoogleId_returnsExistingUserWithoutSaving() {
+        User existing = User.forGoogleSignIn("Test Boxer", "boxer@example.com", "google-sub-123", Role.BOXER);
+        existing.setId(1L);
+        when(userRepository.findByGoogleId("google-sub-123")).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> userService.register(dto))
-                .isInstanceOf(ResourceAlreadyExistsException.class);
+        User result = userService.findOrCreateByGoogle("google-sub-123", "boxer@example.com", "Test Boxer");
 
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void createUser_newEmail_createsUserWithGivenRole() {
-        UserAdminCreateDTO dto = new UserAdminCreateDTO("New Admin", "admin2@example.com", "password123", Role.ADMIN);
-        User admin = new User("New Admin", "admin2@example.com", "hash", Role.ADMIN);
-        admin.setId(2L);
-
-        when(userRepository.existsByEmail("admin2@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("hash");
-        when(userRepository.save(any(User.class))).thenReturn(admin);
-
-        UserResponseDTO result = userService.createUser(dto);
-
-        assertThat(result.getRole()).isEqualTo(Role.ADMIN);
-        assertThat(result.getEmail()).isEqualTo("admin2@example.com");
-    }
-
-    @Test
-    void createUser_emailAlreadyExists_throwsException() {
-        UserAdminCreateDTO dto = new UserAdminCreateDTO("New Admin", "boxer@example.com", "password123", Role.ADMIN);
-        when(userRepository.existsByEmail("boxer@example.com")).thenReturn(true);
-
-        assertThatThrownBy(() -> userService.createUser(dto))
-                .isInstanceOf(ResourceAlreadyExistsException.class);
-
+        assertThat(result.getId()).isEqualTo(1L);
         verify(userRepository, never()).save(any());
     }
 

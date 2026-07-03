@@ -27,8 +27,8 @@ A backend REST API for a boxing training management app. Admins manage content (
 
 ## What it does
 
-- **Auth**: public registration (default `BOXER` role), JWT-based login.
-- **Users**: admin-only creation with configurable role, listing, retrieval, update, deletion.
+- **Auth**: Google Sign-In for boxers (account auto-provisioned with role `BOXER` on first login) plus a single local email/password login reserved for the seeded admin account.
+- **Users**: admin manages existing accounts — listing, retrieval, role updates (e.g. promoting a boxer to `ADMIN`), deletion.
 - **Videos**: training content (technique, strength, cardio, nutrition; YouTube or self-hosted), admin-managed.
 - **Workouts** (`Workout`): full CRUD with nested `Exercise` sub-resources (sets, difficulty level: beginner/intermediate/advanced).
 - **Timer configurations**: CRUD scoped to the authenticated user — each boxer only sees and manages their own.
@@ -60,13 +60,16 @@ Errors are handled centrally via `@RestControllerAdvice` (`GlobalExceptionHandle
 
 ## Security
 
-- **Authentication**: JWT — login returns a signed token, sent as a Bearer token on every protected request.
+- **Authentication**: two providers, no in-between. Boxers authenticate exclusively via Google Sign-In — the backend verifies the Google ID token's signature and audience server-side (`GoogleIdTokenVerifier`) and rejects unverified emails; the frontend's own claims are never trusted directly. The only local, password-based account is the seeded admin. Either path issues the same app-signed JWT, sent as a Bearer token on every protected request.
 - **Authorization**: two layers — global route rules in `SecurityConfig` (e.g. `/api/v1/users/**` restricted to `ADMIN`, `/api/v1/timer-configurations/**` open to `BOXER` or `ADMIN`) plus method-level `@PreAuthorize` on write operations (create/edit/delete restricted to `ADMIN`).
 - **Input validation**: Bean Validation (`@Valid`, `@NotBlank`, `@Email`, `@Size`, etc.) on every request DTO.
+- **No client-controlled roles**: new accounts are always created with role `BOXER` server-side on first Google login; promoting someone to `ADMIN` is a separate, authenticated admin action (`PUT /api/v1/users/{id}`) — a client can never request a role for itself.
 
-**A real vulnerability found and fixed during development:** the registration and user-management endpoints originally returned the `User` entity directly as JSON, leaking the bcrypt password hash and other internal Spring Security fields. Fixed by introducing a dedicated `UserResponseDTO` that exposes only safe fields. Controller tests now explicitly assert that sensitive fields never appear in any response.
+**Two real issues found and fixed during development:**
+1. The registration and user-management endpoints originally returned the `User` entity directly as JSON, leaking the bcrypt password hash and other internal Spring Security fields. Fixed with a dedicated `UserResponseDTO`; controller tests now explicitly assert sensitive fields never appear in any response.
+2. Validation failures (`@Valid`) on public endpoints returned an opaque `403` instead of `400` in real deployment — the test suite (MockMvc) never caught it because it doesn't reproduce the container-level internal error dispatch that real Tomcat performs, which Spring Security was blocking. Fixed by explicitly permitting the `ERROR` dispatcher type in `SecurityConfig`. Found through manual end-to-end verification against a running Docker container, not through the automated tests.
 
-> When deployed, the JWT secret used in production is generated fresh and kept exclusive to that environment (e.g. `openssl rand -base64 32`) — it is never the placeholder value committed in `.env.example`.
+> When deployed, the JWT secret and Google OAuth Client ID used in production are exclusive to that environment — never the placeholder values committed in `.env.example`.
 
 ## Testing
 
@@ -74,7 +77,7 @@ Errors are handled centrally via `@RestControllerAdvice` (`GlobalExceptionHandle
 
 1. **Unit tests** (JUnit 5 + Mockito) — business logic in isolation, repositories mocked.
 2. **Controller tests** (MockMvc + `@WebMvcTest`) — request/response validation, role-based access control, status codes, and explicit checks that sensitive data (passwords) never leaks in responses.
-3. **Integration tests** (`@SpringBootTest` + in-memory H2) — full end-to-end flows: register → login → real JWT → authenticated calls, against a real (in-memory) database, no mocks.
+3. **Integration tests** (`@SpringBootTest` + in-memory H2) — full end-to-end flows: Google login (with a mocked token verifier) → account provisioning → real JWT → authenticated calls, against a real (in-memory) database, no mocks beyond the Google verification boundary.
 
 ```bash
 ./mvnw test
@@ -100,9 +103,9 @@ Full interactive documentation is available via Swagger/OpenAPI once the app is 
 
 | Resource | Access |
 |---|---|
-| `POST /api/v1/auth/register` | Public |
-| `POST /api/v1/auth/login` | Public |
-| `GET/POST/PUT/DELETE /api/v1/users/**` | `ADMIN` |
+| `POST /api/v1/auth/google` | Public — Google Sign-In, auto-provisions `BOXER` accounts |
+| `POST /api/v1/auth/login` | Public — local login, admin account only |
+| `GET/PUT/DELETE /api/v1/users/**` | `ADMIN` |
 | `GET /api/v1/videos` | Authenticated |
 | `POST/PUT/DELETE /api/v1/videos` | `ADMIN` |
 | `/api/v1/workouts/**` incl. `/{id}/exercises` | Authenticated (writes: `ADMIN`) |
