@@ -20,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Tag(name = "Workouts", description = "Workout management and their exercises")
 @SecurityRequirement(name = "bearerAuth")
@@ -50,7 +51,7 @@ public class WorkoutController {
             @ApiResponse(responseCode = "404", description = "Workout not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<WorkoutResponseDTO> get(@PathVariable Long id) {
+    public ResponseEntity<WorkoutResponseDTO> get(@PathVariable UUID id) {
         return ResponseEntity.ok(workoutService.getById(id));
     }
 
@@ -75,7 +76,7 @@ public class WorkoutController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<WorkoutResponseDTO> update(@PathVariable Long id, @Valid @RequestBody WorkoutRequestDTO dto) {
+    public ResponseEntity<WorkoutResponseDTO> update(@PathVariable UUID id, @Valid @RequestBody WorkoutRequestDTO dto) {
         return ResponseEntity.ok(workoutService.update(id, dto));
     }
 
@@ -87,7 +88,7 @@ public class WorkoutController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         workoutService.delete(id);
         return ResponseEntity.noContent().build();
     }
@@ -101,7 +102,7 @@ public class WorkoutController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/exercises")
-    public ResponseEntity<ExerciseResponseDTO> addExercise(@PathVariable Long id, @Valid @RequestBody ExerciseRequestDTO dto) {
+    public ResponseEntity<ExerciseResponseDTO> addExercise(@PathVariable UUID id, @Valid @RequestBody ExerciseRequestDTO dto) {
         return new ResponseEntity<>(workoutService.addExercise(id, dto), HttpStatus.CREATED);
     }
 
@@ -114,7 +115,7 @@ public class WorkoutController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/exercises/{exerciseId}")
-    public ResponseEntity<ExerciseResponseDTO> updateExercise(@PathVariable Long id, @PathVariable Long exerciseId, @Valid @RequestBody ExerciseRequestDTO dto) {
+    public ResponseEntity<ExerciseResponseDTO> updateExercise(@PathVariable UUID id, @PathVariable UUID exerciseId, @Valid @RequestBody ExerciseRequestDTO dto) {
         return ResponseEntity.ok(workoutService.updateExercise(id, exerciseId, dto));
     }
 
@@ -126,7 +127,7 @@ public class WorkoutController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/exercises/{exerciseId}")
-    public ResponseEntity<Void> deleteExercise(@PathVariable Long id, @PathVariable Long exerciseId) {
+    public ResponseEntity<Void> deleteExercise(@PathVariable UUID id, @PathVariable UUID exerciseId) {
         workoutService.deleteExercise(id, exerciseId);
         return ResponseEntity.noContent().build();
     }

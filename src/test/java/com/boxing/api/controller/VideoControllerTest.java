@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -48,12 +49,15 @@ class VideoControllerTest {
     @MockitoBean
     private UserDetailsService userDetailsService;
 
+    private static final UUID VIDEO_ID = UUID.randomUUID();
+    private static final UUID NON_EXISTING_ID = UUID.randomUUID();
+
     private VideoResponseDTO responseDTO;
     private VideoRequestDTO requestDTO;
 
     @BeforeEach
     void setUp() {
-        responseDTO = new VideoResponseDTO(1L, "Jab Cross", "Basic technique", VideoType.YOUTUBE, "https://youtube.com/watch?v=abc", VideoCategory.TECHNIQUE);
+        responseDTO = new VideoResponseDTO(VIDEO_ID, "Jab Cross", "Basic technique", VideoType.YOUTUBE, "https://youtube.com/watch?v=abc", VideoCategory.TECHNIQUE);
 
         requestDTO = new VideoRequestDTO();
         requestDTO.setTitle("Jab Cross");
@@ -75,19 +79,19 @@ class VideoControllerTest {
 
     @Test
     void get_existingId_returnsVideoAndStatus200() throws Exception {
-        when(videoService.getById(1L)).thenReturn(responseDTO);
+        when(videoService.getById(VIDEO_ID)).thenReturn(responseDTO);
 
-        mockMvc.perform(get("/api/v1/videos/1").with(user("test").roles("USER")))
+        mockMvc.perform(get("/api/v1/videos/" + VIDEO_ID).with(user("test").roles("USER")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(VIDEO_ID.toString()))
                 .andExpect(jsonPath("$.title").value("Jab Cross"));
     }
 
     @Test
     void get_nonExistingId_returnsStatus404() throws Exception {
-        when(videoService.getById(99L)).thenThrow(new NoSuchElementException("Video not found"));
+        when(videoService.getById(NON_EXISTING_ID)).thenThrow(new NoSuchElementException("Video not found"));
 
-        mockMvc.perform(get("/api/v1/videos/99").with(user("test").roles("USER")))
+        mockMvc.perform(get("/api/v1/videos/" + NON_EXISTING_ID).with(user("test").roles("USER")))
                 .andExpect(status().isNotFound());
     }
 
@@ -128,9 +132,9 @@ class VideoControllerTest {
 
     @Test
     void delete_valid_returnsStatus204() throws Exception {
-        doNothing().when(videoService).delete(1L);
+        doNothing().when(videoService).delete(VIDEO_ID);
 
-        mockMvc.perform(delete("/api/v1/videos/1")
+        mockMvc.perform(delete("/api/v1/videos/" + VIDEO_ID)
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
@@ -138,9 +142,9 @@ class VideoControllerTest {
 
     @Test
     void delete_nonExistingId_returnsStatus404() throws Exception {
-        doThrow(new NoSuchElementException("Video not found")).when(videoService).delete(99L);
+        doThrow(new NoSuchElementException("Video not found")).when(videoService).delete(NON_EXISTING_ID);
 
-        mockMvc.perform(delete("/api/v1/videos/99")
+        mockMvc.perform(delete("/api/v1/videos/" + NON_EXISTING_ID)
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf()))
                 .andExpect(status().isNotFound());

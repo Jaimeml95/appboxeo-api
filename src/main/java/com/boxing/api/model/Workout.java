@@ -8,14 +8,15 @@ import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "workouts")
 public class Workout {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @NotBlank(message = "Name must not be blank")
     @Size(max = 150, message = "Name must not exceed 150 characters")
@@ -47,8 +48,8 @@ public class Workout {
         this.estimatedDuration = estimatedDuration;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

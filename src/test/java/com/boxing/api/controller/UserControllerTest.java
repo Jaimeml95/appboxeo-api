@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,11 +46,14 @@ class UserControllerTest {
     @MockitoBean
     private JwtService jwtService;
 
+    private static final UUID USER_ID = UUID.randomUUID();
+    private static final UUID NON_EXISTING_ID = UUID.randomUUID();
+
     private UserResponseDTO responseDTO;
 
     @BeforeEach
     void setUp() {
-        responseDTO = new UserResponseDTO(1L, "Test Boxer", "boxer@example.com", Role.BOXER, null, LocalDateTime.now());
+        responseDTO = new UserResponseDTO(USER_ID, "Test Boxer", "boxer@example.com", Role.BOXER, null, LocalDateTime.now());
     }
 
     @Test
@@ -70,29 +74,29 @@ class UserControllerTest {
 
     @Test
     void get_existingId_returnsUserAndStatus200() throws Exception {
-        when(userService.getById(1L)).thenReturn(responseDTO);
+        when(userService.getById(USER_ID)).thenReturn(responseDTO);
 
-        mockMvc.perform(get("/api/v1/users/1").with(user("admin").roles("ADMIN")))
+        mockMvc.perform(get("/api/v1/users/" + USER_ID).with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(USER_ID.toString()))
                 .andExpect(jsonPath("$.email").value("boxer@example.com"));
     }
 
     @Test
     void get_nonExistingId_returnsStatus404() throws Exception {
-        when(userService.getById(99L)).thenThrow(new NoSuchElementException("User not found"));
+        when(userService.getById(NON_EXISTING_ID)).thenThrow(new NoSuchElementException("User not found"));
 
-        mockMvc.perform(get("/api/v1/users/99").with(user("admin").roles("ADMIN")))
+        mockMvc.perform(get("/api/v1/users/" + NON_EXISTING_ID).with(user("admin").roles("ADMIN")))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void update_valid_returnsUserAndStatus200() throws Exception {
         UserUpdateDTO updateDTO = new UserUpdateDTO("Updated Name", Role.ADMIN);
-        UserResponseDTO updated = new UserResponseDTO(1L, "Updated Name", "boxer@example.com", Role.ADMIN, null, LocalDateTime.now());
-        when(userService.update(eq(1L), any(UserUpdateDTO.class))).thenReturn(updated);
+        UserResponseDTO updated = new UserResponseDTO(USER_ID, "Updated Name", "boxer@example.com", Role.ADMIN, null, LocalDateTime.now());
+        when(userService.update(eq(USER_ID), any(UserUpdateDTO.class))).thenReturn(updated);
 
-        mockMvc.perform(put("/api/v1/users/1")
+        mockMvc.perform(put("/api/v1/users/" + USER_ID)
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -105,10 +109,10 @@ class UserControllerTest {
     @Test
     void update_nonExistingId_returnsStatus404() throws Exception {
         UserUpdateDTO updateDTO = new UserUpdateDTO("Updated Name", Role.ADMIN);
-        when(userService.update(eq(99L), any(UserUpdateDTO.class)))
+        when(userService.update(eq(NON_EXISTING_ID), any(UserUpdateDTO.class)))
                 .thenThrow(new NoSuchElementException("User not found"));
 
-        mockMvc.perform(put("/api/v1/users/99")
+        mockMvc.perform(put("/api/v1/users/" + NON_EXISTING_ID)
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -118,9 +122,9 @@ class UserControllerTest {
 
     @Test
     void delete_valid_returnsStatus204() throws Exception {
-        doNothing().when(userService).delete(1L);
+        doNothing().when(userService).delete(USER_ID);
 
-        mockMvc.perform(delete("/api/v1/users/1")
+        mockMvc.perform(delete("/api/v1/users/" + USER_ID)
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
@@ -128,9 +132,9 @@ class UserControllerTest {
 
     @Test
     void delete_nonExistingId_returnsStatus404() throws Exception {
-        doThrow(new NoSuchElementException("User not found")).when(userService).delete(99L);
+        doThrow(new NoSuchElementException("User not found")).when(userService).delete(NON_EXISTING_ID);
 
-        mockMvc.perform(delete("/api/v1/users/99")
+        mockMvc.perform(delete("/api/v1/users/" + NON_EXISTING_ID)
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf()))
                 .andExpect(status().isNotFound());

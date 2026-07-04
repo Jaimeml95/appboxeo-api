@@ -3,10 +3,11 @@ package com.boxing.api.controller.dto;
 import com.boxing.api.model.Role;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class UserResponseDTO {
 
-    private Long id;
+    private UUID id;
     private String name;
     private String email;
     private Role role;
@@ -15,7 +16,7 @@ public class UserResponseDTO {
 
     public UserResponseDTO() {}
 
-    public UserResponseDTO(Long id, String name, String email, Role role, String pictureUrl, LocalDateTime createdAt) {
+    public UserResponseDTO(UUID id, String name, String email, Role role, String pictureUrl, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -24,8 +25,8 @@ public class UserResponseDTO {
         this.createdAt = createdAt;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @Service
 public class WorkoutServiceImpl implements WorkoutService {
@@ -38,7 +39,7 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     @Transactional(readOnly = true)
-    public WorkoutResponseDTO getById(Long id) {
+    public WorkoutResponseDTO getById(UUID id) {
         return toResponse(findWorkoutById(id));
     }
 
@@ -53,7 +54,7 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     @Transactional
-    public WorkoutResponseDTO update(Long id, WorkoutRequestDTO dto) {
+    public WorkoutResponseDTO update(UUID id, WorkoutRequestDTO dto) {
         Workout workout = findWorkoutById(id);
         workout.setName(dto.getName());
         workout.setDescription(dto.getDescription());
@@ -64,13 +65,13 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void delete(UUID id) {
         workoutRepository.delete(findWorkoutById(id));
     }
 
     @Override
     @Transactional
-    public ExerciseResponseDTO addExercise(Long workoutId, ExerciseRequestDTO dto) {
+    public ExerciseResponseDTO addExercise(UUID workoutId, ExerciseRequestDTO dto) {
         Workout workout = findWorkoutById(workoutId);
         Exercise exercise = new Exercise(
                 dto.getName(), dto.getDescription(), dto.getSets(), dto.getReps(), dto.getRest(), workout
@@ -80,7 +81,7 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     @Transactional
-    public ExerciseResponseDTO updateExercise(Long workoutId, Long exerciseId, ExerciseRequestDTO dto) {
+    public ExerciseResponseDTO updateExercise(UUID workoutId, UUID exerciseId, ExerciseRequestDTO dto) {
         Exercise exercise = exerciseRepository.findByIdAndWorkoutId(exerciseId, workoutId)
                 .orElseThrow(() -> new NoSuchElementException("Exercise not found"));
         exercise.setName(dto.getName());
@@ -93,13 +94,13 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     @Override
     @Transactional
-    public void deleteExercise(Long workoutId, Long exerciseId) {
+    public void deleteExercise(UUID workoutId, UUID exerciseId) {
         Exercise exercise = exerciseRepository.findByIdAndWorkoutId(exerciseId, workoutId)
                 .orElseThrow(() -> new NoSuchElementException("Exercise not found"));
         exerciseRepository.delete(exercise);
     }
 
-    private Workout findWorkoutById(Long id) {
+    private Workout findWorkoutById(UUID id) {
         return workoutRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Workout not found"));
     }

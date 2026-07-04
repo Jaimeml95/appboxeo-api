@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -51,13 +52,17 @@ class TimerConfigurationControllerTest {
     @MockitoBean
     private UserDetailsService userDetailsService;
 
+    private static final UUID USER_ID = UUID.randomUUID();
+    private static final UUID CONFIG_ID = UUID.randomUUID();
+    private static final UUID NON_EXISTING_ID = UUID.randomUUID();
+
     private TimerConfigurationResponseDTO responseDTO;
     private TimerConfigurationRequestDTO requestDTO;
     private Authentication authBoxer;
 
     @BeforeEach
     void setUp() {
-        responseDTO = new TimerConfigurationResponseDTO(1L, "Classic Sparring", 12, 180, 60);
+        responseDTO = new TimerConfigurationResponseDTO(CONFIG_ID, "Classic Sparring", 12, 180, 60);
 
         requestDTO = new TimerConfigurationRequestDTO();
         requestDTO.setName("Classic Sparring");
@@ -66,13 +71,13 @@ class TimerConfigurationControllerTest {
         requestDTO.setRest(60);
 
         User user = new User("Ana Lopez", "ana@boxing.com", "hashed", Role.BOXER);
-        user.setId(1L);
+        user.setId(USER_ID);
         authBoxer = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
     }
 
     @Test
     void list_authenticated_returnsListAndStatus200() throws Exception {
-        when(timerConfigurationService.getByUser(1L)).thenReturn(List.of(responseDTO));
+        when(timerConfigurationService.getByUser(USER_ID)).thenReturn(List.of(responseDTO));
 
         mockMvc.perform(get("/api/v1/timer-configurations")
                         .with(authentication(authBoxer)))
@@ -90,7 +95,7 @@ class TimerConfigurationControllerTest {
 
     @Test
     void create_valid_returnsConfigurationAndStatus201() throws Exception {
-        when(timerConfigurationService.create(any(TimerConfigurationRequestDTO.class), eq(1L))).thenReturn(responseDTO);
+        when(timerConfigurationService.create(any(TimerConfigurationRequestDTO.class), eq(USER_ID))).thenReturn(responseDTO);
 
         mockMvc.perform(post("/api/v1/timer-configurations")
                         .with(authentication(authBoxer))
@@ -115,9 +120,9 @@ class TimerConfigurationControllerTest {
 
     @Test
     void delete_valid_returnsStatus204() throws Exception {
-        doNothing().when(timerConfigurationService).delete(1L, 1L);
+        doNothing().when(timerConfigurationService).delete(CONFIG_ID, USER_ID);
 
-        mockMvc.perform(delete("/api/v1/timer-configurations/1")
+        mockMvc.perform(delete("/api/v1/timer-configurations/" + CONFIG_ID)
                         .with(authentication(authBoxer))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
@@ -126,9 +131,9 @@ class TimerConfigurationControllerTest {
     @Test
     void delete_nonExistingId_returnsStatus404() throws Exception {
         doThrow(new NoSuchElementException("Configuration not found"))
-                .when(timerConfigurationService).delete(99L, 1L);
+                .when(timerConfigurationService).delete(NON_EXISTING_ID, USER_ID);
 
-        mockMvc.perform(delete("/api/v1/timer-configurations/99")
+        mockMvc.perform(delete("/api/v1/timer-configurations/" + NON_EXISTING_ID)
                         .with(authentication(authBoxer))
                         .with(csrf()))
                 .andExpect(status().isNotFound());

@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -37,6 +38,11 @@ class TimerConfigurationServiceImplTest {
     @InjectMocks
     private TimerConfigurationServiceImpl timerConfigurationService;
 
+    private static final UUID USER_ID = UUID.randomUUID();
+    private static final UUID NON_EXISTING_USER_ID = UUID.randomUUID();
+    private static final UUID CONFIG_ID = UUID.randomUUID();
+    private static final UUID NON_EXISTING_CONFIG_ID = UUID.randomUUID();
+
     private User user;
     private TimerConfiguration config;
     private TimerConfigurationRequestDTO requestDTO;
@@ -44,10 +50,10 @@ class TimerConfigurationServiceImplTest {
     @BeforeEach
     void setUp() {
         user = new User("Carlos", "carlos@boxing.com", "password123", Role.BOXER);
-        user.setId(1L);
+        user.setId(USER_ID);
 
         config = new TimerConfiguration("Classic Rounds", 3, 180, 60, user);
-        config.setId(1L);
+        config.setId(CONFIG_ID);
 
         requestDTO = new TimerConfigurationRequestDTO();
         requestDTO.setName("Classic Rounds");
@@ -58,9 +64,9 @@ class TimerConfigurationServiceImplTest {
 
     @Test
     void getByUser_returnsUserConfigurations() {
-        when(timerConfigurationRepository.findByUserId(1L)).thenReturn(List.of(config));
+        when(timerConfigurationRepository.findByUserId(USER_ID)).thenReturn(List.of(config));
 
-        List<TimerConfigurationResponseDTO> result = timerConfigurationService.getByUser(1L);
+        List<TimerConfigurationResponseDTO> result = timerConfigurationService.getByUser(USER_ID);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getName()).isEqualTo("Classic Rounds");
@@ -69,19 +75,19 @@ class TimerConfigurationServiceImplTest {
 
     @Test
     void getByUser_noConfigurations_returnsEmptyList() {
-        when(timerConfigurationRepository.findByUserId(1L)).thenReturn(List.of());
+        when(timerConfigurationRepository.findByUserId(USER_ID)).thenReturn(List.of());
 
-        List<TimerConfigurationResponseDTO> result = timerConfigurationService.getByUser(1L);
+        List<TimerConfigurationResponseDTO> result = timerConfigurationService.getByUser(USER_ID);
 
         assertThat(result).isEmpty();
     }
 
     @Test
     void create_existingUser_savesAndReturnsConfiguration() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         when(timerConfigurationRepository.save(any(TimerConfiguration.class))).thenReturn(config);
 
-        TimerConfigurationResponseDTO result = timerConfigurationService.create(requestDTO, 1L);
+        TimerConfigurationResponseDTO result = timerConfigurationService.create(requestDTO, USER_ID);
 
         assertThat(result.getName()).isEqualTo("Classic Rounds");
         assertThat(result.getRoundDuration()).isEqualTo(180);
@@ -91,9 +97,9 @@ class TimerConfigurationServiceImplTest {
 
     @Test
     void create_nonExistingUser_throwsException() {
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        when(userRepository.findById(NON_EXISTING_USER_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> timerConfigurationService.create(requestDTO, 99L))
+        assertThatThrownBy(() -> timerConfigurationService.create(requestDTO, NON_EXISTING_USER_ID))
                 .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessage("User not found");
     }
@@ -106,10 +112,10 @@ class TimerConfigurationServiceImplTest {
         updatedDTO.setRoundDuration(120);
         updatedDTO.setRest(30);
 
-        when(timerConfigurationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(config));
+        when(timerConfigurationRepository.findByIdAndUserId(CONFIG_ID, USER_ID)).thenReturn(Optional.of(config));
         when(timerConfigurationRepository.save(any(TimerConfiguration.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        TimerConfigurationResponseDTO result = timerConfigurationService.update(1L, updatedDTO, 1L);
+        TimerConfigurationResponseDTO result = timerConfigurationService.update(CONFIG_ID, updatedDTO, USER_ID);
 
         assertThat(result.getName()).isEqualTo("Intense Rounds");
         assertThat(result.getRounds()).isEqualTo(6);
@@ -118,27 +124,27 @@ class TimerConfigurationServiceImplTest {
 
     @Test
     void update_nonExisting_throwsException() {
-        when(timerConfigurationRepository.findByIdAndUserId(99L, 1L)).thenReturn(Optional.empty());
+        when(timerConfigurationRepository.findByIdAndUserId(NON_EXISTING_CONFIG_ID, USER_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> timerConfigurationService.update(99L, requestDTO, 1L))
+        assertThatThrownBy(() -> timerConfigurationService.update(NON_EXISTING_CONFIG_ID, requestDTO, USER_ID))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("Configuration not found");
     }
 
     @Test
     void delete_existing_deletesConfiguration() {
-        when(timerConfigurationRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(config));
+        when(timerConfigurationRepository.findByIdAndUserId(CONFIG_ID, USER_ID)).thenReturn(Optional.of(config));
 
-        timerConfigurationService.delete(1L, 1L);
+        timerConfigurationService.delete(CONFIG_ID, USER_ID);
 
         verify(timerConfigurationRepository, times(1)).delete(config);
     }
 
     @Test
     void delete_nonExisting_throwsException() {
-        when(timerConfigurationRepository.findByIdAndUserId(99L, 1L)).thenReturn(Optional.empty());
+        when(timerConfigurationRepository.findByIdAndUserId(NON_EXISTING_CONFIG_ID, USER_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> timerConfigurationService.delete(99L, 1L))
+        assertThatThrownBy(() -> timerConfigurationService.delete(NON_EXISTING_CONFIG_ID, USER_ID))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("Configuration not found");
     }

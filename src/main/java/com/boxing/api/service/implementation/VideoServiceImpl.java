@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @Service
 public class VideoServiceImpl implements VideoService {
@@ -31,7 +32,7 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     @Transactional(readOnly = true)
-    public VideoResponseDTO getById(Long id) {
+    public VideoResponseDTO getById(UUID id) {
         return toResponse(findVideoById(id));
     }
 
@@ -44,7 +45,7 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     @Transactional
-    public VideoResponseDTO update(Long id, VideoRequestDTO dto) {
+    public VideoResponseDTO update(UUID id, VideoRequestDTO dto) {
         Video video = findVideoById(id);
         video.setTitle(dto.getTitle());
         video.setDescription(dto.getDescription());
@@ -56,11 +57,11 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void delete(UUID id) {
         videoRepository.delete(findVideoById(id));
     }
 
-    private Video findVideoById(Long id) {
+    private Video findVideoById(UUID id) {
         return videoRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Video not found"));
     }

@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -47,12 +48,15 @@ class WorkoutControllerTest {
     @MockitoBean
     private UserDetailsService userDetailsService;
 
+    private static final UUID WORKOUT_ID = UUID.randomUUID();
+    private static final UUID NON_EXISTING_ID = UUID.randomUUID();
+
     private WorkoutResponseDTO responseDTO;
     private WorkoutRequestDTO requestDTO;
 
     @BeforeEach
     void setUp() {
-        responseDTO = new WorkoutResponseDTO(1L, "Basic Boxing", "Beginner introduction workout", Difficulty.BEGINNER, 45, List.of());
+        responseDTO = new WorkoutResponseDTO(WORKOUT_ID, "Basic Boxing", "Beginner introduction workout", Difficulty.BEGINNER, 45, List.of());
 
         requestDTO = new WorkoutRequestDTO();
         requestDTO.setName("Basic Boxing");
@@ -73,19 +77,19 @@ class WorkoutControllerTest {
 
     @Test
     void get_existingId_returnsWorkoutAndStatus200() throws Exception {
-        when(workoutService.getById(1L)).thenReturn(responseDTO);
+        when(workoutService.getById(WORKOUT_ID)).thenReturn(responseDTO);
 
-        mockMvc.perform(get("/api/v1/workouts/1").with(user("test").roles("USER")))
+        mockMvc.perform(get("/api/v1/workouts/" + WORKOUT_ID).with(user("test").roles("USER")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(WORKOUT_ID.toString()))
                 .andExpect(jsonPath("$.name").value("Basic Boxing"));
     }
 
     @Test
     void get_nonExistingId_returnsStatus404() throws Exception {
-        when(workoutService.getById(99L)).thenThrow(new NoSuchElementException("Workout not found"));
+        when(workoutService.getById(NON_EXISTING_ID)).thenThrow(new NoSuchElementException("Workout not found"));
 
-        mockMvc.perform(get("/api/v1/workouts/99").with(user("test").roles("USER")))
+        mockMvc.perform(get("/api/v1/workouts/" + NON_EXISTING_ID).with(user("test").roles("USER")))
                 .andExpect(status().isNotFound());
     }
 
@@ -126,9 +130,9 @@ class WorkoutControllerTest {
 
     @Test
     void delete_valid_returnsStatus204() throws Exception {
-        doNothing().when(workoutService).delete(1L);
+        doNothing().when(workoutService).delete(WORKOUT_ID);
 
-        mockMvc.perform(delete("/api/v1/workouts/1")
+        mockMvc.perform(delete("/api/v1/workouts/" + WORKOUT_ID)
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
@@ -136,9 +140,9 @@ class WorkoutControllerTest {
 
     @Test
     void delete_nonExistingId_returnsStatus404() throws Exception {
-        doThrow(new NoSuchElementException("Workout not found")).when(workoutService).delete(99L);
+        doThrow(new NoSuchElementException("Workout not found")).when(workoutService).delete(NON_EXISTING_ID);
 
-        mockMvc.perform(delete("/api/v1/workouts/99")
+        mockMvc.perform(delete("/api/v1/workouts/" + NON_EXISTING_ID)
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf()))
                 .andExpect(status().isNotFound());

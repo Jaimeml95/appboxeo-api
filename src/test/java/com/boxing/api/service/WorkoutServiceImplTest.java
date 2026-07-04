@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -39,13 +40,17 @@ class WorkoutServiceImplTest {
     @InjectMocks
     private WorkoutServiceImpl workoutService;
 
+    private static final UUID WORKOUT_ID = UUID.randomUUID();
+    private static final UUID NON_EXISTING_ID = UUID.randomUUID();
+    private static final UUID EXERCISE_ID = UUID.randomUUID();
+
     private Workout workout;
     private WorkoutRequestDTO requestDTO;
 
     @BeforeEach
     void setUp() {
         workout = new Workout("Basic Cardio", "Cardio session", Difficulty.BEGINNER, 30);
-        workout.setId(1L);
+        workout.setId(WORKOUT_ID);
 
         requestDTO = new WorkoutRequestDTO();
         requestDTO.setName("Basic Cardio");
@@ -76,20 +81,20 @@ class WorkoutServiceImplTest {
 
     @Test
     void getById_existing_returnsWorkout() {
-        when(workoutRepository.findById(1L)).thenReturn(Optional.of(workout));
+        when(workoutRepository.findById(WORKOUT_ID)).thenReturn(Optional.of(workout));
 
-        WorkoutResponseDTO result = workoutService.getById(1L);
+        WorkoutResponseDTO result = workoutService.getById(WORKOUT_ID);
 
-        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getId()).isEqualTo(WORKOUT_ID);
         assertThat(result.getName()).isEqualTo("Basic Cardio");
         assertThat(result.getEstimatedDuration()).isEqualTo(30);
     }
 
     @Test
     void getById_nonExisting_throwsException() {
-        when(workoutRepository.findById(99L)).thenReturn(Optional.empty());
+        when(workoutRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> workoutService.getById(99L))
+        assertThatThrownBy(() -> workoutService.getById(NON_EXISTING_ID))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("Workout not found");
     }
@@ -113,10 +118,10 @@ class WorkoutServiceImplTest {
         updatedDTO.setDifficulty(Difficulty.ADVANCED);
         updatedDTO.setEstimatedDuration(60);
 
-        when(workoutRepository.findById(1L)).thenReturn(Optional.of(workout));
+        when(workoutRepository.findById(WORKOUT_ID)).thenReturn(Optional.of(workout));
         when(workoutRepository.save(any(Workout.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        WorkoutResponseDTO result = workoutService.update(1L, updatedDTO);
+        WorkoutResponseDTO result = workoutService.update(WORKOUT_ID, updatedDTO);
 
         assertThat(result.getName()).isEqualTo("Advanced Strength");
         assertThat(result.getDifficulty()).isEqualTo(Difficulty.ADVANCED);
@@ -125,27 +130,27 @@ class WorkoutServiceImplTest {
 
     @Test
     void update_nonExisting_throwsException() {
-        when(workoutRepository.findById(99L)).thenReturn(Optional.empty());
+        when(workoutRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> workoutService.update(99L, requestDTO))
+        assertThatThrownBy(() -> workoutService.update(NON_EXISTING_ID, requestDTO))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("Workout not found");
     }
 
     @Test
     void delete_existing_deletesWorkout() {
-        when(workoutRepository.findById(1L)).thenReturn(Optional.of(workout));
+        when(workoutRepository.findById(WORKOUT_ID)).thenReturn(Optional.of(workout));
 
-        workoutService.delete(1L);
+        workoutService.delete(WORKOUT_ID);
 
         verify(workoutRepository, times(1)).delete(workout);
     }
 
     @Test
     void delete_nonExisting_throwsException() {
-        when(workoutRepository.findById(99L)).thenReturn(Optional.empty());
+        when(workoutRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> workoutService.delete(99L))
+        assertThatThrownBy(() -> workoutService.delete(NON_EXISTING_ID))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("Workout not found");
     }
@@ -160,12 +165,12 @@ class WorkoutServiceImplTest {
         exerciseDTO.setRest(60);
 
         Exercise exercise = new Exercise("Squats", "Weighted squats", 4, 12, 60, workout);
-        exercise.setId(1L);
+        exercise.setId(EXERCISE_ID);
 
-        when(workoutRepository.findById(1L)).thenReturn(Optional.of(workout));
+        when(workoutRepository.findById(WORKOUT_ID)).thenReturn(Optional.of(workout));
         when(exerciseRepository.save(any(Exercise.class))).thenReturn(exercise);
 
-        ExerciseResponseDTO result = workoutService.addExercise(1L, exerciseDTO);
+        ExerciseResponseDTO result = workoutService.addExercise(WORKOUT_ID, exerciseDTO);
 
         assertThat(result.getName()).isEqualTo("Squats");
         assertThat(result.getSets()).isEqualTo(4);
@@ -174,20 +179,20 @@ class WorkoutServiceImplTest {
 
     @Test
     void addExercise_workoutNotExisting_throwsException() {
-        when(workoutRepository.findById(99L)).thenReturn(Optional.empty());
+        when(workoutRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
         ExerciseRequestDTO exerciseDTO = new ExerciseRequestDTO();
 
-        assertThatThrownBy(() -> workoutService.addExercise(99L, exerciseDTO))
+        assertThatThrownBy(() -> workoutService.addExercise(NON_EXISTING_ID, exerciseDTO))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("Workout not found");
     }
 
     @Test
     void deleteExercise_nonExisting_throwsException() {
-        when(exerciseRepository.findByIdAndWorkoutId(99L, 1L)).thenReturn(Optional.empty());
+        when(exerciseRepository.findByIdAndWorkoutId(NON_EXISTING_ID, WORKOUT_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> workoutService.deleteExercise(1L, 99L))
+        assertThatThrownBy(() -> workoutService.deleteExercise(WORKOUT_ID, NON_EXISTING_ID))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("Exercise not found");
     }

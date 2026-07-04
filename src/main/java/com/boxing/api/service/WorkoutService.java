@@ -6,22 +6,23 @@ import com.boxing.api.controller.dto.WorkoutRequestDTO;
 import com.boxing.api.controller.dto.WorkoutResponseDTO;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface WorkoutService {
 
     List<WorkoutResponseDTO> getAll();
 
-    WorkoutResponseDTO getById(Long id);
+    WorkoutResponseDTO getById(UUID id);
 
     WorkoutResponseDTO create(WorkoutRequestDTO dto);
 
-    WorkoutResponseDTO update(Long id, WorkoutRequestDTO dto);
+    WorkoutResponseDTO update(UUID id, WorkoutRequestDTO dto);
 
-    void delete(Long id);
+    void delete(UUID id);
 
-    ExerciseResponseDTO addExercise(Long workoutId, ExerciseRequestDTO dto);
+    ExerciseResponseDTO addExercise(UUID workoutId, ExerciseRequestDTO dto);
 
-    ExerciseResponseDTO updateExercise(Long workoutId, Long exerciseId, ExerciseRequestDTO dto);
+    ExerciseResponseDTO updateExercise(UUID workoutId, UUID exerciseId, ExerciseRequestDTO dto);
 
-    void deleteExercise(Long workoutId, Long exerciseId);
+    void deleteExercise(UUID workoutId, UUID exerciseId);
 }

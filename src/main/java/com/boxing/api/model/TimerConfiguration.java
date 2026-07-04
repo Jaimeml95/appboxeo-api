@@ -6,13 +6,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "timer_configurations")
 public class TimerConfiguration {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @NotBlank(message = "Name must not be blank")
     @Size(max = 100, message = "Name must not exceed 100 characters")
@@ -48,8 +50,8 @@ public class TimerConfiguration {
         this.user = user;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

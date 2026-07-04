@@ -6,6 +6,7 @@ import com.boxing.api.model.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface UserService extends UserDetailsService {
 
@@ -16,9 +17,9 @@ public interface UserService extends UserDetailsService {
 
     List<UserResponseDTO> getAll();
 
-    UserResponseDTO getById(Long id);
+    UserResponseDTO getById(UUID id);
 
-    UserResponseDTO update(Long id, UserUpdateDTO dto);
+    UserResponseDTO update(UUID id, UserUpdateDTO dto);
 
-    void delete(Long id);
+    void delete(UUID id);
 }

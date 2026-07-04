@@ -3,9 +3,11 @@ package com.boxing.api.controller.dto;
 import com.boxing.api.model.VideoCategory;
 import com.boxing.api.model.VideoType;
 
+import java.util.UUID;
+
 public class VideoResponseDTO {
 
-    private Long id;
+    private UUID id;
     private String title;
     private String description;
     private VideoType type;
@@ -14,7 +16,7 @@ public class VideoResponseDTO {
 
     public VideoResponseDTO() {}
 
-    public VideoResponseDTO(Long id, String title, String description, VideoType type, String url, VideoCategory category) {
+    public VideoResponseDTO(UUID id, String title, String description, VideoType type, String url, VideoCategory category) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -23,8 +25,8 @@ public class VideoResponseDTO {
         this.category = category;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }

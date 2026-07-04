@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @Service
 public class TimerConfigurationServiceImpl implements TimerConfigurationService {
@@ -28,7 +29,7 @@ public class TimerConfigurationServiceImpl implements TimerConfigurationService 
 
     @Override
     @Transactional(readOnly = true)
-    public List<TimerConfigurationResponseDTO> getByUser(Long userId) {
+    public List<TimerConfigurationResponseDTO> getByUser(UUID userId) {
         return timerConfigurationRepository.findByUserId(userId)
                 .stream()
                 .map(this::toResponse)
@@ -37,7 +38,7 @@ public class TimerConfigurationServiceImpl implements TimerConfigurationService 
 
     @Override
     @Transactional
-    public TimerConfigurationResponseDTO create(TimerConfigurationRequestDTO dto, Long userId) {
+    public TimerConfigurationResponseDTO create(TimerConfigurationRequestDTO dto, UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -50,7 +51,7 @@ public class TimerConfigurationServiceImpl implements TimerConfigurationService 
 
     @Override
     @Transactional
-    public TimerConfigurationResponseDTO update(Long id, TimerConfigurationRequestDTO dto, Long userId) {
+    public TimerConfigurationResponseDTO update(UUID id, TimerConfigurationRequestDTO dto, UUID userId) {
         TimerConfiguration config = timerConfigurationRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NoSuchElementException("Configuration not found"));
 
@@ -64,7 +65,7 @@ public class TimerConfigurationServiceImpl implements TimerConfigurationService 
 
     @Override
     @Transactional
-    public void delete(Long id, Long userId) {
+    public void delete(UUID id, UUID userId) {
         TimerConfiguration config = timerConfigurationRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NoSuchElementException("Configuration not found"));
 

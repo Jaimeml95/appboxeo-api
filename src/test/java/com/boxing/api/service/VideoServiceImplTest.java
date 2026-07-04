@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -32,13 +33,16 @@ class VideoServiceImplTest {
     @InjectMocks
     private VideoServiceImpl videoService;
 
+    private static final UUID VIDEO_ID = UUID.randomUUID();
+    private static final UUID NON_EXISTING_ID = UUID.randomUUID();
+
     private Video video;
     private VideoRequestDTO requestDTO;
 
     @BeforeEach
     void setUp() {
         video = new Video("Jab Cross", "Basic jab technique", VideoType.YOUTUBE, "https://youtube.com/watch?v=abc", VideoCategory.TECHNIQUE);
-        video.setId(1L);
+        video.setId(VIDEO_ID);
 
         requestDTO = new VideoRequestDTO();
         requestDTO.setTitle("Jab Cross");
@@ -70,20 +74,20 @@ class VideoServiceImplTest {
 
     @Test
     void getById_existing_returnsVideo() {
-        when(videoRepository.findById(1L)).thenReturn(Optional.of(video));
+        when(videoRepository.findById(VIDEO_ID)).thenReturn(Optional.of(video));
 
-        VideoResponseDTO result = videoService.getById(1L);
+        VideoResponseDTO result = videoService.getById(VIDEO_ID);
 
-        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getId()).isEqualTo(VIDEO_ID);
         assertThat(result.getTitle()).isEqualTo("Jab Cross");
         assertThat(result.getType()).isEqualTo(VideoType.YOUTUBE);
     }
 
     @Test
     void getById_nonExisting_throwsException() {
-        when(videoRepository.findById(99L)).thenReturn(Optional.empty());
+        when(videoRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> videoService.getById(99L))
+        assertThatThrownBy(() -> videoService.getById(NON_EXISTING_ID))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("Video not found");
     }
@@ -108,10 +112,10 @@ class VideoServiceImplTest {
         updatedDTO.setUrl("https://myserver.com/uppercut.mp4");
         updatedDTO.setCategory(VideoCategory.STRENGTH);
 
-        when(videoRepository.findById(1L)).thenReturn(Optional.of(video));
+        when(videoRepository.findById(VIDEO_ID)).thenReturn(Optional.of(video));
         when(videoRepository.save(any(Video.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        VideoResponseDTO result = videoService.update(1L, updatedDTO);
+        VideoResponseDTO result = videoService.update(VIDEO_ID, updatedDTO);
 
         assertThat(result.getTitle()).isEqualTo("Uppercut");
         assertThat(result.getType()).isEqualTo(VideoType.OWN);
@@ -120,27 +124,27 @@ class VideoServiceImplTest {
 
     @Test
     void update_nonExisting_throwsException() {
-        when(videoRepository.findById(99L)).thenReturn(Optional.empty());
+        when(videoRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> videoService.update(99L, requestDTO))
+        assertThatThrownBy(() -> videoService.update(NON_EXISTING_ID, requestDTO))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("Video not found");
     }
 
     @Test
     void delete_existing_deletesVideo() {
-        when(videoRepository.findById(1L)).thenReturn(Optional.of(video));
+        when(videoRepository.findById(VIDEO_ID)).thenReturn(Optional.of(video));
 
-        videoService.delete(1L);
+        videoService.delete(VIDEO_ID);
 
         verify(videoRepository, times(1)).delete(video);
     }
 
     @Test
     void delete_nonExisting_throwsException() {
-        when(videoRepository.findById(99L)).thenReturn(Optional.empty());
+        when(videoRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> videoService.delete(99L))
+        assertThatThrownBy(() -> videoService.delete(NON_EXISTING_ID))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("Video not found");
     }

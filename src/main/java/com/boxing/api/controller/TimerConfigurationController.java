@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Tag(name = "Timer Configurations", description = "Management of per-user timer configurations")
 @SecurityRequirement(name = "bearerAuth")
@@ -64,7 +65,7 @@ public class TimerConfigurationController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<TimerConfigurationResponseDTO> update(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Valid @RequestBody TimerConfigurationRequestDTO dto,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(timerConfigurationService.update(id, dto, user.getId()));
@@ -77,7 +78,7 @@ public class TimerConfigurationController {
             @ApiResponse(responseCode = "404", description = "Configuration not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id, @AuthenticationPrincipal User user) {
         timerConfigurationService.delete(id, user.getId());
         return ResponseEntity.noContent().build();
     }

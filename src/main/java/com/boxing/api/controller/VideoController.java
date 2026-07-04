@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Tag(name = "Videos", description = "Video management")
 @SecurityRequirement(name = "bearerAuth")
@@ -48,7 +49,7 @@ public class VideoController {
             @ApiResponse(responseCode = "404", description = "Video not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<VideoResponseDTO> get(@PathVariable Long id) {
+    public ResponseEntity<VideoResponseDTO> get(@PathVariable UUID id) {
         return ResponseEntity.ok(videoService.getById(id));
     }
 
@@ -73,7 +74,7 @@ public class VideoController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<VideoResponseDTO> update(@PathVariable Long id, @Valid @RequestBody VideoRequestDTO dto) {
+    public ResponseEntity<VideoResponseDTO> update(@PathVariable UUID id, @Valid @RequestBody VideoRequestDTO dto) {
         return ResponseEntity.ok(videoService.update(id, dto));
     }
 
@@ -85,7 +86,7 @@ public class VideoController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         videoService.delete(id);
         return ResponseEntity.noContent().build();
     }

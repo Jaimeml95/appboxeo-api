@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,19 +34,22 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
+    private static final UUID USER_ID = UUID.randomUUID();
+    private static final UUID NON_EXISTING_ID = UUID.randomUUID();
+
     private User user;
 
     @BeforeEach
     void setUp() {
         user = new User("Test Boxer", "boxer@example.com", "passwordHash", Role.BOXER);
-        user.setId(1L);
+        user.setId(USER_ID);
     }
 
     @Test
     void findOrCreateByGoogle_newGoogleId_createsUserWithBoxerRole() {
         User created = User.forGoogleSignIn("Test Boxer", "boxer@example.com", "google-sub-123",
                 "https://example.com/photo.jpg", Role.BOXER);
-        created.setId(1L);
+        created.setId(USER_ID);
         when(userRepository.findByGoogleId("google-sub-123")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(created);
 
@@ -63,14 +67,14 @@ class UserServiceImplTest {
     void findOrCreateByGoogle_existingGoogleId_syncsNameAndPictureFromGoogle() {
         User existing = User.forGoogleSignIn("Old Name", "boxer@example.com", "google-sub-123",
                 "https://example.com/old.jpg", Role.BOXER);
-        existing.setId(1L);
+        existing.setId(USER_ID);
         when(userRepository.findByGoogleId("google-sub-123")).thenReturn(Optional.of(existing));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User result = userService.findOrCreateByGoogle("google-sub-123", "boxer@example.com", "New Name",
                 "https://example.com/new.jpg");
 
-        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getId()).isEqualTo(USER_ID);
         assertThat(result.getName()).isEqualTo("New Name");
         assertThat(result.getPictureUrl()).isEqualTo("https://example.com/new.jpg");
         verify(userRepository, times(1)).save(existing);
@@ -88,19 +92,19 @@ class UserServiceImplTest {
 
     @Test
     void getById_existing_returnsUser() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 
-        UserResponseDTO result = userService.getById(1L);
+        UserResponseDTO result = userService.getById(USER_ID);
 
-        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getId()).isEqualTo(USER_ID);
         assertThat(result.getName()).isEqualTo("Test Boxer");
     }
 
     @Test
     void getById_nonExisting_throwsException() {
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        when(userRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.getById(99L))
+        assertThatThrownBy(() -> userService.getById(NON_EXISTING_ID))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("User not found");
     }
@@ -108,10 +112,10 @@ class UserServiceImplTest {
     @Test
     void update_existing_updatesNameAndRole() {
         UserUpdateDTO dto = new UserUpdateDTO("Updated Name", Role.ADMIN);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        UserResponseDTO result = userService.update(1L, dto);
+        UserResponseDTO result = userService.update(USER_ID, dto);
 
         assertThat(result.getName()).isEqualTo("Updated Name");
         assertThat(result.getRole()).isEqualTo(Role.ADMIN);
@@ -120,27 +124,27 @@ class UserServiceImplTest {
     @Test
     void update_nonExisting_throwsException() {
         UserUpdateDTO dto = new UserUpdateDTO("Updated Name", Role.ADMIN);
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        when(userRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.update(99L, dto))
+        assertThatThrownBy(() -> userService.update(NON_EXISTING_ID, dto))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("User not found");
     }
 
     @Test
     void delete_existing_deletesUser() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 
-        userService.delete(1L);
+        userService.delete(USER_ID);
 
         verify(userRepository, times(1)).delete(user);
     }
 
     @Test
     void delete_nonExisting_throwsException() {
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        when(userRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.delete(99L))
+        assertThatThrownBy(() -> userService.delete(NON_EXISTING_ID))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("User not found");
     }

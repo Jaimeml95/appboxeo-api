@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Tag(name = "Users", description = "User management — ADMIN only. Accounts are provisioned automatically on first Google Sign-In; this API only manages existing accounts.")
 @SecurityRequirement(name = "bearerAuth")
@@ -46,7 +47,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> get(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDTO> get(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.getById(id));
     }
 
@@ -58,7 +59,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto) {
+    public ResponseEntity<UserResponseDTO> update(@PathVariable UUID id, @Valid @RequestBody UserUpdateDTO dto) {
         return ResponseEntity.ok(userService.update(id, dto));
     }
 
@@ -69,7 +70,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();
     }

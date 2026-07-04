@@ -3,10 +3,11 @@ package com.boxing.api.controller.dto;
 import com.boxing.api.model.Difficulty;
 
 import java.util.List;
+import java.util.UUID;
 
 public class WorkoutResponseDTO {
 
-    private Long id;
+    private UUID id;
     private String name;
     private String description;
     private Difficulty difficulty;
@@ -15,7 +16,7 @@ public class WorkoutResponseDTO {
 
     public WorkoutResponseDTO() {}
 
-    public WorkoutResponseDTO(Long id, String name, String description, Difficulty difficulty, Integer estimatedDuration, List<ExerciseResponseDTO> exercises) {
+    public WorkoutResponseDTO(UUID id, String name, String description, Difficulty difficulty, Integer estimatedDuration, List<ExerciseResponseDTO> exercises) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -24,8 +25,8 @@ public class WorkoutResponseDTO {
         this.exercises = exercises;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

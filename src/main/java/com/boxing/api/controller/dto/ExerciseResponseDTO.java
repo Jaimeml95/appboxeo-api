@@ -1,8 +1,10 @@
 package com.boxing.api.controller.dto;
 
+import java.util.UUID;
+
 public class ExerciseResponseDTO {
 
-    private Long id;
+    private UUID id;
     private String name;
     private String description;
     private Integer sets;
@@ -11,7 +13,7 @@ public class ExerciseResponseDTO {
 
     public ExerciseResponseDTO() {}
 
-    public ExerciseResponseDTO(Long id, String name, String description, Integer sets, Integer reps, Integer rest) {
+    public ExerciseResponseDTO(UUID id, String name, String description, Integer sets, Integer reps, Integer rest) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -20,8 +22,8 @@ public class ExerciseResponseDTO {
         this.rest = rest;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

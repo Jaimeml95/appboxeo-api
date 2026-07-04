@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -43,13 +44,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponseDTO getById(Long id) {
+    public UserResponseDTO getById(UUID id) {
         return toResponse(findUserById(id));
     }
 
     @Override
     @Transactional
-    public UserResponseDTO update(Long id, UserUpdateDTO dto) {
+    public UserResponseDTO update(UUID id, UserUpdateDTO dto) {
         User user = findUserById(id);
         user.setName(dto.name());
         user.setRole(dto.role());
@@ -58,7 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void delete(UUID id) {
         userRepository.delete(findUserById(id));
     }
 
@@ -68,7 +69,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
-    private User findUserById(Long id) {
+    private User findUserById(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
     }

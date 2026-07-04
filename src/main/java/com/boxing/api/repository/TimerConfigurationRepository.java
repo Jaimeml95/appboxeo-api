@@ -5,10 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface TimerConfigurationRepository extends JpaRepository<TimerConfiguration, Long> {
+public interface TimerConfigurationRepository extends JpaRepository<TimerConfiguration, UUID> {
 
-    List<TimerConfiguration> findByUserId(Long userId);
+    List<TimerConfiguration> findByUserId(UUID userId);
 
-    Optional<TimerConfiguration> findByIdAndUserId(Long id, Long userId);
+    Optional<TimerConfiguration> findByIdAndUserId(UUID id, UUID userId);
 }

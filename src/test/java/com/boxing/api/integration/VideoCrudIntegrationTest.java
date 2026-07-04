@@ -64,14 +64,14 @@ class VideoCrudIntegrationTest {
                 .andExpect(jsonPath("$.category").value("TECHNIQUE"))
                 .andReturn();
 
-        Long id = objectMapper.readTree(createResult.getResponse().getContentAsString())
-                .get("id").asLong();
+        String id = objectMapper.readTree(createResult.getResponse().getContentAsString())
+                .get("id").asText();
 
         // READ (list)
         mockMvc.perform(get("/api/v1/videos")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.id == " + id + ")]").exists());
+                .andExpect(jsonPath("$[?(@.id == '" + id + "')]").exists());
 
         // READ (by id)
         mockMvc.perform(get("/api/v1/videos/" + id)
