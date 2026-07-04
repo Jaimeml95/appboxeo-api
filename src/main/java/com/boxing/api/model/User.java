@@ -38,6 +38,11 @@ public class User implements UserDetails {
     @Column(name = "google_id", unique = true)
     private String googleId;
 
+    // Non-null only for accounts provisioned through Google Sign-In; synced
+    // from the Google ID token on every login.
+    @Column(name = "picture_url")
+    private String pictureUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
@@ -59,9 +64,10 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    public static User forGoogleSignIn(String name, String email, String googleId, Role role) {
+    public static User forGoogleSignIn(String name, String email, String googleId, String pictureUrl, Role role) {
         User user = new User(name, email, null, role);
         user.googleId = googleId;
+        user.pictureUrl = pictureUrl;
         return user;
     }
 
@@ -95,6 +101,9 @@ public class User implements UserDetails {
 
     public String getGoogleId() { return googleId; }
     public void setGoogleId(String googleId) { this.googleId = googleId; }
+
+    public String getPictureUrl() { return pictureUrl; }
+    public void setPictureUrl(String pictureUrl) { this.pictureUrl = pictureUrl; }
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }

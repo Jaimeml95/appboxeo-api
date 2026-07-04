@@ -51,7 +51,8 @@ class VideoAccessIntegrationTest {
         // find-or-create because @BeforeEach runs before every test in this class.
         User boxer = userRepository.findByGoogleId("google-sub-access")
                 .orElseGet(() -> userRepository.save(
-                        User.forGoogleSignIn("Access Boxer", "boxer.access@example.com", "google-sub-access", Role.BOXER)));
+                        User.forGoogleSignIn("Access Boxer", "boxer.access@example.com", "google-sub-access",
+                                "https://example.com/access.jpg", Role.BOXER)));
         boxerToken = jwtService.generateToken(boxer);
     }
 

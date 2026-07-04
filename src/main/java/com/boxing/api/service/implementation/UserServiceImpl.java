@@ -25,9 +25,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User findOrCreateByGoogle(String googleId, String email, String name) {
+    public User findOrCreateByGoogle(String googleId, String email, String name, String pictureUrl) {
         return userRepository.findByGoogleId(googleId)
-                .orElseGet(() -> userRepository.save(User.forGoogleSignIn(name, email, googleId, Role.BOXER)));
+                .map(user -> {
+                    user.setName(name);
+                    user.setPictureUrl(pictureUrl);
+                    return userRepository.save(user);
+                })
+                .orElseGet(() -> userRepository.save(User.forGoogleSignIn(name, email, googleId, pictureUrl, Role.BOXER)));
     }
 
     @Override
@@ -69,6 +74,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserResponseDTO toResponse(User u) {
-        return new UserResponseDTO(u.getId(), u.getName(), u.getEmail(), u.getRole(), u.getCreatedAt());
+        return new UserResponseDTO(u.getId(), u.getName(), u.getEmail(), u.getRole(), u.getPictureUrl(), u.getCreatedAt());
     }
 }

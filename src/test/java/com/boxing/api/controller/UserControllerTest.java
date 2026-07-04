@@ -49,7 +49,7 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        responseDTO = new UserResponseDTO(1L, "Test Boxer", "boxer@example.com", Role.BOXER, LocalDateTime.now());
+        responseDTO = new UserResponseDTO(1L, "Test Boxer", "boxer@example.com", Role.BOXER, null, LocalDateTime.now());
     }
 
     @Test
@@ -89,7 +89,7 @@ class UserControllerTest {
     @Test
     void update_valid_returnsUserAndStatus200() throws Exception {
         UserUpdateDTO updateDTO = new UserUpdateDTO("Updated Name", Role.ADMIN);
-        UserResponseDTO updated = new UserResponseDTO(1L, "Updated Name", "boxer@example.com", Role.ADMIN, LocalDateTime.now());
+        UserResponseDTO updated = new UserResponseDTO(1L, "Updated Name", "boxer@example.com", Role.ADMIN, null, LocalDateTime.now());
         when(userService.update(eq(1L), any(UserUpdateDTO.class))).thenReturn(updated);
 
         mockMvc.perform(put("/api/v1/users/1")

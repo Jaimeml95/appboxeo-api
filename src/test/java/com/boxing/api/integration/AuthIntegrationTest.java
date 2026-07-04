@@ -43,7 +43,8 @@ class AuthIntegrationTest {
     @Test
     void googleLogin_firstTime_createsUserWithBoxerRole_andReturnsJwt() throws Exception {
         when(googleTokenVerifier.verify("valid-token"))
-                .thenReturn(new GoogleUserInfo("google-sub-1", "new.boxer@example.com", "New Boxer"));
+                .thenReturn(new GoogleUserInfo("google-sub-1", "new.boxer@example.com", "New Boxer",
+                        "https://example.com/photo1.jpg"));
 
         mockMvc.perform(post("/api/v1/auth/google")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -61,7 +62,8 @@ class AuthIntegrationTest {
     @Test
     void googleLogin_sameGoogleIdTwice_doesNotCreateDuplicateUser() throws Exception {
         when(googleTokenVerifier.verify("valid-token-2"))
-                .thenReturn(new GoogleUserInfo("google-sub-2", "repeat.boxer@example.com", "Repeat Boxer"));
+                .thenReturn(new GoogleUserInfo("google-sub-2", "repeat.boxer@example.com", "Repeat Boxer",
+                        "https://example.com/photo2.jpg"));
 
         mockMvc.perform(post("/api/v1/auth/google")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -100,7 +102,8 @@ class AuthIntegrationTest {
     @Test
     void localLogin_withGoogleOnlyAccountEmail_returns401_notServerError() throws Exception {
         when(googleTokenVerifier.verify("provisioning-token"))
-                .thenReturn(new GoogleUserInfo("google-sub-3", "google.only@example.com", "Google Only"));
+                .thenReturn(new GoogleUserInfo("google-sub-3", "google.only@example.com", "Google Only",
+                        "https://example.com/photo3.jpg"));
         mockMvc.perform(post("/api/v1/auth/google")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("idToken", "provisioning-token"))))

@@ -10,8 +10,9 @@ import java.util.List;
 public interface UserService extends UserDetailsService {
 
     // Returns the entity (not a response DTO) because the caller needs it as
-    // UserDetails to issue a JWT right away.
-    User findOrCreateByGoogle(String googleId, String email, String name);
+    // UserDetails to issue a JWT right away. Syncs name/pictureUrl from
+    // Google on every login, not just on first creation.
+    User findOrCreateByGoogle(String googleId, String email, String name, String pictureUrl);
 
     List<UserResponseDTO> getAll();
 

@@ -10,15 +10,17 @@ public class UserResponseDTO {
     private String name;
     private String email;
     private Role role;
+    private String pictureUrl;
     private LocalDateTime createdAt;
 
     public UserResponseDTO() {}
 
-    public UserResponseDTO(Long id, String name, String email, Role role, LocalDateTime createdAt) {
+    public UserResponseDTO(Long id, String name, String email, Role role, String pictureUrl, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.role = role;
+        this.pictureUrl = pictureUrl;
         this.createdAt = createdAt;
     }
 
@@ -33,6 +35,9 @@ public class UserResponseDTO {
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
+
+    public String getPictureUrl() { return pictureUrl; }
+    public void setPictureUrl(String pictureUrl) { this.pictureUrl = pictureUrl; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

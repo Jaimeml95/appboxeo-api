@@ -44,6 +44,7 @@ public class GoogleTokenVerifierImpl implements GoogleTokenVerifier {
             throw new BadCredentialsException("Google email is not verified");
         }
 
-        return new GoogleUserInfo(payload.getSubject(), payload.getEmail(), (String) payload.get("name"));
+        return new GoogleUserInfo(payload.getSubject(), payload.getEmail(), (String) payload.get("name"),
+                (String) payload.get("picture"));
     }
 }

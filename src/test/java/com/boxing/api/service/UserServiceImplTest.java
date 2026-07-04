@@ -43,29 +43,37 @@ class UserServiceImplTest {
 
     @Test
     void findOrCreateByGoogle_newGoogleId_createsUserWithBoxerRole() {
-        User created = User.forGoogleSignIn("Test Boxer", "boxer@example.com", "google-sub-123", Role.BOXER);
+        User created = User.forGoogleSignIn("Test Boxer", "boxer@example.com", "google-sub-123",
+                "https://example.com/photo.jpg", Role.BOXER);
         created.setId(1L);
         when(userRepository.findByGoogleId("google-sub-123")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(created);
 
-        User result = userService.findOrCreateByGoogle("google-sub-123", "boxer@example.com", "Test Boxer");
+        User result = userService.findOrCreateByGoogle("google-sub-123", "boxer@example.com", "Test Boxer",
+                "https://example.com/photo.jpg");
 
         assertThat(result.getEmail()).isEqualTo("boxer@example.com");
         assertThat(result.getRole()).isEqualTo(Role.BOXER);
         assertThat(result.getGoogleId()).isEqualTo("google-sub-123");
+        assertThat(result.getPictureUrl()).isEqualTo("https://example.com/photo.jpg");
         verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
-    void findOrCreateByGoogle_existingGoogleId_returnsExistingUserWithoutSaving() {
-        User existing = User.forGoogleSignIn("Test Boxer", "boxer@example.com", "google-sub-123", Role.BOXER);
+    void findOrCreateByGoogle_existingGoogleId_syncsNameAndPictureFromGoogle() {
+        User existing = User.forGoogleSignIn("Old Name", "boxer@example.com", "google-sub-123",
+                "https://example.com/old.jpg", Role.BOXER);
         existing.setId(1L);
         when(userRepository.findByGoogleId("google-sub-123")).thenReturn(Optional.of(existing));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        User result = userService.findOrCreateByGoogle("google-sub-123", "boxer@example.com", "Test Boxer");
+        User result = userService.findOrCreateByGoogle("google-sub-123", "boxer@example.com", "New Name",
+                "https://example.com/new.jpg");
 
         assertThat(result.getId()).isEqualTo(1L);
-        verify(userRepository, never()).save(any());
+        assertThat(result.getName()).isEqualTo("New Name");
+        assertThat(result.getPictureUrl()).isEqualTo("https://example.com/new.jpg");
+        verify(userRepository, times(1)).save(existing);
     }
 
     @Test

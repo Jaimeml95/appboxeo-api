@@ -52,7 +52,8 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<LoginResponseDTO> loginWithGoogle(@Valid @RequestBody GoogleLoginRequestDTO dto) {
         GoogleUserInfo googleUser = googleTokenVerifier.verify(dto.idToken());
-        User user = userService.findOrCreateByGoogle(googleUser.googleId(), googleUser.email(), googleUser.name());
+        User user = userService.findOrCreateByGoogle(googleUser.googleId(), googleUser.email(), googleUser.name(),
+                googleUser.pictureUrl());
         String token = jwtService.generateToken(user);
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
