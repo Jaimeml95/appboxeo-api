@@ -33,6 +33,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseDTO(HttpStatus.CONFLICT.value(), "Conflict", ex.getMessage()));
     }
 
+    @ExceptionHandler(ProtectedAdminOperationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleProtectedAdminOperation(ProtectedAdminOperationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponseDTO(HttpStatus.FORBIDDEN.value(), "Forbidden", ex.getMessage()));
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         return ResponseEntity

@@ -2,10 +2,12 @@ package com.boxing.api.service.implementation;
 
 import com.boxing.api.controller.dto.UserUpdateDTO;
 import com.boxing.api.controller.dto.UserResponseDTO;
+import com.boxing.api.exception.ProtectedAdminOperationException;
 import com.boxing.api.model.Role;
 import com.boxing.api.model.User;
 import com.boxing.api.repository.UserRepository;
 import com.boxing.api.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,9 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+
+    @Value("${admin.email}")
+    private String seededAdminEmail;
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -57,6 +62,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponseDTO update(UUID id, UserUpdateDTO dto) {
         User user = findUserById(id);
+        if (dto.role() != Role.ADMIN && isSeededAdmin(user)) {
+            throw new ProtectedAdminOperationException("The seeded admin account cannot be demoted");
+        }
         user.setName(dto.name());
         user.setRole(dto.role());
         return toResponse(userRepository.save(user));
@@ -65,7 +73,15 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void delete(UUID id) {
-        userRepository.delete(findUserById(id));
+        User user = findUserById(id);
+        if (isSeededAdmin(user)) {
+            throw new ProtectedAdminOperationException("The seeded admin account cannot be deleted");
+        }
+        userRepository.delete(user);
+    }
+
+    private boolean isSeededAdmin(User user) {
+        return seededAdminEmail.equalsIgnoreCase(user.getEmail());
     }
 
     @Override

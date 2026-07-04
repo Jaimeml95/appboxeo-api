@@ -2,6 +2,7 @@ package com.boxing.api.service;
 
 import com.boxing.api.controller.dto.UserUpdateDTO;
 import com.boxing.api.controller.dto.UserResponseDTO;
+import com.boxing.api.exception.ProtectedAdminOperationException;
 import com.boxing.api.model.Role;
 import com.boxing.api.model.User;
 import com.boxing.api.repository.UserRepository;
@@ -14,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -36,13 +38,21 @@ class UserServiceImplTest {
 
     private static final UUID USER_ID = UUID.randomUUID();
     private static final UUID NON_EXISTING_ID = UUID.randomUUID();
+    private static final UUID SEEDED_ADMIN_ID = UUID.randomUUID();
+    private static final String SEEDED_ADMIN_EMAIL = "admin@seed.com";
 
     private User user;
+    private User seededAdmin;
 
     @BeforeEach
     void setUp() {
         user = new User("Test Boxer", "boxer@example.com", "passwordHash", Role.BOXER);
         user.setId(USER_ID);
+
+        seededAdmin = new User("Admin", SEEDED_ADMIN_EMAIL, "adminHash", Role.ADMIN);
+        seededAdmin.setId(SEEDED_ADMIN_ID);
+
+        ReflectionTestUtils.setField(userService, "seededAdminEmail", SEEDED_ADMIN_EMAIL);
     }
 
     @Test
@@ -122,6 +132,28 @@ class UserServiceImplTest {
     }
 
     @Test
+    void update_seededAdminDemotedToBoxer_throwsProtectedAdminOperationException() {
+        UserUpdateDTO dto = new UserUpdateDTO("Admin", Role.BOXER);
+        when(userRepository.findById(SEEDED_ADMIN_ID)).thenReturn(Optional.of(seededAdmin));
+
+        assertThatThrownBy(() -> userService.update(SEEDED_ADMIN_ID, dto))
+                .isInstanceOf(ProtectedAdminOperationException.class);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void update_seededAdminKeepingAdminRole_renamesSuccessfully() {
+        UserUpdateDTO dto = new UserUpdateDTO("New Admin Name", Role.ADMIN);
+        when(userRepository.findById(SEEDED_ADMIN_ID)).thenReturn(Optional.of(seededAdmin));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        UserResponseDTO result = userService.update(SEEDED_ADMIN_ID, dto);
+
+        assertThat(result.getName()).isEqualTo("New Admin Name");
+        assertThat(result.getRole()).isEqualTo(Role.ADMIN);
+    }
+
+    @Test
     void update_nonExisting_throwsException() {
         UserUpdateDTO dto = new UserUpdateDTO("Updated Name", Role.ADMIN);
         when(userRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
@@ -138,6 +170,27 @@ class UserServiceImplTest {
         userService.delete(USER_ID);
 
         verify(userRepository, times(1)).delete(user);
+    }
+
+    @Test
+    void delete_seededAdmin_throwsProtectedAdminOperationException() {
+        when(userRepository.findById(SEEDED_ADMIN_ID)).thenReturn(Optional.of(seededAdmin));
+
+        assertThatThrownBy(() -> userService.delete(SEEDED_ADMIN_ID))
+                .isInstanceOf(ProtectedAdminOperationException.class);
+        verify(userRepository, never()).delete(any());
+    }
+
+    @Test
+    void delete_promotedGoogleAdmin_notProtected_deletesNormally() {
+        User promotedAdmin = User.forGoogleSignIn("Promoted Admin", "promoted@example.com", "google-sub-9",
+                null, Role.ADMIN);
+        promotedAdmin.setId(USER_ID);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(promotedAdmin));
+
+        userService.delete(USER_ID);
+
+        verify(userRepository, times(1)).delete(promotedAdmin);
     }
 
     @Test

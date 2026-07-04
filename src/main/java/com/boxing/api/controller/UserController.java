@@ -67,7 +67,7 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User updated"),
             @ApiResponse(responseCode = "400", description = "Invalid data", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "403", description = "Missing token or role other than ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Missing token, role other than ADMIN, or attempt to demote the seeded admin account", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PutMapping("/{id}")
@@ -78,7 +78,7 @@ public class UserController {
     @Operation(summary = "Delete user", description = "Deletes a user. ADMIN only.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "User deleted"),
-            @ApiResponse(responseCode = "403", description = "Missing token or role other than ADMIN", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "403", description = "Missing token, role other than ADMIN, or attempt to delete the seeded admin account", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @DeleteMapping("/{id}")
