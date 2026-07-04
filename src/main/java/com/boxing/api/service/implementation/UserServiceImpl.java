@@ -49,6 +49,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponseDTO toResponseDTO(User user) {
+        return toResponse(user);
+    }
+
+    @Override
     @Transactional
     public UserResponseDTO update(UUID id, UserUpdateDTO dto) {
         User user = findUserById(id);

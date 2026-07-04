@@ -3,6 +3,7 @@ package com.boxing.api.controller;
 import com.boxing.api.controller.dto.UserUpdateDTO;
 import com.boxing.api.controller.dto.UserResponseDTO;
 import com.boxing.api.exception.ErrorResponseDTO;
+import com.boxing.api.model.User;
 import com.boxing.api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +40,16 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> listUsers() {
         return ResponseEntity.ok(userService.getAll());
+    }
+
+    @Operation(summary = "Get current user", description = "Returns the profile of the authenticated user.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "403", description = "Missing token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDTO> getCurrentUser(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(userService.toResponseDTO(user));
     }
 
     @Operation(summary = "Get user", description = "Returns the detail of a user. ADMIN only.")

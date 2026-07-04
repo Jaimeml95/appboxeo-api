@@ -150,6 +150,16 @@ class UserServiceImplTest {
     }
 
     @Test
+    void toResponseDTO_mapsUserFields() {
+        UserResponseDTO result = userService.toResponseDTO(user);
+
+        assertThat(result.getId()).isEqualTo(USER_ID);
+        assertThat(result.getName()).isEqualTo("Test Boxer");
+        assertThat(result.getEmail()).isEqualTo("boxer@example.com");
+        assertThat(result.getRole()).isEqualTo(Role.BOXER);
+    }
+
+    @Test
     void loadUserByUsername_existing_returnsUserDetails() {
         when(userRepository.findByEmail("boxer@example.com")).thenReturn(Optional.of(user));
 

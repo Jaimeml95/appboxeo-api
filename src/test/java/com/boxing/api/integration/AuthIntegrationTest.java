@@ -51,7 +51,10 @@ class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(Map.of("idToken", "valid-token"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isString())
-                .andExpect(jsonPath("$.token").isNotEmpty());
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.user.email").value("new.boxer@example.com"))
+                .andExpect(jsonPath("$.user.role").value("BOXER"))
+                .andExpect(jsonPath("$.user.password").doesNotExist());
 
         assertThat(userRepository.findByGoogleId("google-sub-1"))
                 .isPresent()
@@ -132,7 +135,10 @@ class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isString())
-                .andExpect(jsonPath("$.token").isNotEmpty());
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.user.email").value("admin@test.com"))
+                .andExpect(jsonPath("$.user.role").value("ADMIN"))
+                .andExpect(jsonPath("$.user.password").doesNotExist());
     }
 
     @Test

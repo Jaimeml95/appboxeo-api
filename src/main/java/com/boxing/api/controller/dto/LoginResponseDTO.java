@@ -1,3 +1,3 @@
 package com.boxing.api.controller.dto;
 
-public record LoginResponseDTO(String token) {}
+public record LoginResponseDTO(String token, UserResponseDTO user) {}

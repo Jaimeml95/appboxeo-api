@@ -19,7 +19,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,7 +54,7 @@ public class AuthController {
         User user = userService.findOrCreateByGoogle(googleUser.googleId(), googleUser.email(), googleUser.name(),
                 googleUser.pictureUrl());
         String token = jwtService.generateToken(user);
-        return ResponseEntity.ok(new LoginResponseDTO(token));
+        return ResponseEntity.ok(new LoginResponseDTO(token, userService.toResponseDTO(user)));
     }
 
     @Operation(summary = "Admin login", description = "Local email/password login, reserved for the seeded admin account.")
@@ -69,8 +68,8 @@ public class AuthController {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.email(), dto.password())
         );
-        UserDetails userDetails = userService.loadUserByUsername(dto.email());
-        String token = jwtService.generateToken(userDetails);
-        return ResponseEntity.ok(new LoginResponseDTO(token));
+        User user = (User) userService.loadUserByUsername(dto.email());
+        String token = jwtService.generateToken(user);
+        return ResponseEntity.ok(new LoginResponseDTO(token, userService.toResponseDTO(user)));
     }
 }

@@ -19,6 +19,8 @@ public interface UserService extends UserDetailsService {
 
     UserResponseDTO getById(UUID id);
 
+    UserResponseDTO toResponseDTO(User user);
+
     UserResponseDTO update(UUID id, UserUpdateDTO dto);
 
     void delete(UUID id);

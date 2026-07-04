@@ -4,6 +4,7 @@ import com.boxing.api.config.SecurityConfig;
 import com.boxing.api.controller.dto.UserUpdateDTO;
 import com.boxing.api.controller.dto.UserResponseDTO;
 import com.boxing.api.model.Role;
+import com.boxing.api.model.User;
 import com.boxing.api.service.JwtService;
 import com.boxing.api.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,6 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -70,6 +73,26 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].email").value("boxer@example.com"))
                 .andExpect(jsonPath("$[0].password").doesNotExist());
+    }
+
+    @Test
+    void getCurrentUser_authenticated_returnsUserAndStatus200() throws Exception {
+        User principal = new User("Test Boxer", "boxer@example.com", null, Role.BOXER);
+        principal.setId(USER_ID);
+        when(userService.toResponseDTO(principal)).thenReturn(responseDTO);
+
+        mockMvc.perform(get("/api/v1/users/me")
+                        .with(authentication(new UsernamePasswordAuthenticationToken(
+                                principal, null, principal.getAuthorities()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(USER_ID.toString()))
+                .andExpect(jsonPath("$.email").value("boxer@example.com"));
+    }
+
+    @Test
+    void getCurrentUser_unauthenticated_returnsStatus403() throws Exception {
+        mockMvc.perform(get("/api/v1/users/me"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
