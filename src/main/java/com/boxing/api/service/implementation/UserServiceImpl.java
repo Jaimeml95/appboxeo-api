@@ -7,6 +7,8 @@ import com.boxing.api.model.Role;
 import com.boxing.api.model.User;
 import com.boxing.api.repository.UserRepository;
 import com.boxing.api.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,6 +21,8 @@ import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserRepository userRepository;
 
@@ -64,6 +68,9 @@ public class UserServiceImpl implements UserService {
         User user = findUserById(id);
         if (dto.role() != Role.ADMIN && isSeededAdmin(user)) {
             throw new ProtectedAdminOperationException("The seeded admin account cannot be demoted");
+        }
+        if (dto.role() != user.getRole()) {
+            log.warn("Role change for user {}: {} -> {}", user.getEmail(), user.getRole(), dto.role());
         }
         user.setName(dto.name());
         user.setRole(dto.role());
