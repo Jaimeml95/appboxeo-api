@@ -7,9 +7,9 @@ A backend REST API for a boxing training management app. Admins manage content (
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-**Live demo:** coming soon (deployment in progress — README will be updated with the link).
+**Live demo:** [https://appboxeo-api.onrender.com/swagger-ui/index.html](https://appboxeo-api.onrender.com/swagger-ui/index.html)
 
-> Note: once deployed, the app will run on a free-tier instance, so the first request after a period of inactivity may take 30–60 seconds to respond while the service spins back up. Subsequent requests are fast.
+> Note: the app runs on a free-tier instance, so the first request after a period of inactivity may take 30–60 seconds to respond while the service spins back up. Subsequent requests are fast.
 
 ---
 
@@ -117,7 +117,7 @@ Every push and pull request to `main` triggers a GitHub Actions workflow that ru
 
 ## Roadmap
 
-- [ ] Deploy to a public environment
+- [x] Deploy to a public environment
 - [ ] Add Docker image publishing to the CI pipeline
 - [ ] Expand automated test coverage as new features are added
 
