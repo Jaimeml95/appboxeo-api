@@ -9,15 +9,20 @@ public class TimerConfigurationResponseDTO {
     private Integer rounds;
     private Integer roundDuration;
     private Integer rest;
+    private Boolean warnBeforeEnd;
+    private Boolean bellSound;
 
     public TimerConfigurationResponseDTO() {}
 
-    public TimerConfigurationResponseDTO(UUID id, String name, Integer rounds, Integer roundDuration, Integer rest) {
+    public TimerConfigurationResponseDTO(UUID id, String name, Integer rounds, Integer roundDuration, Integer rest,
+                                          Boolean warnBeforeEnd, Boolean bellSound) {
         this.id = id;
         this.name = name;
         this.rounds = rounds;
         this.roundDuration = roundDuration;
         this.rest = rest;
+        this.warnBeforeEnd = warnBeforeEnd;
+        this.bellSound = bellSound;
     }
 
     public UUID getId() { return id; }
@@ -34,4 +39,10 @@ public class TimerConfigurationResponseDTO {
 
     public Integer getRest() { return rest; }
     public void setRest(Integer rest) { this.rest = rest; }
+
+    public Boolean getWarnBeforeEnd() { return warnBeforeEnd; }
+    public void setWarnBeforeEnd(Boolean warnBeforeEnd) { this.warnBeforeEnd = warnBeforeEnd; }
+
+    public Boolean getBellSound() { return bellSound; }
+    public void setBellSound(Boolean bellSound) { this.bellSound = bellSound; }
 }

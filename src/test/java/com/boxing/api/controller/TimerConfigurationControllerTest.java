@@ -62,13 +62,15 @@ class TimerConfigurationControllerTest {
 
     @BeforeEach
     void setUp() {
-        responseDTO = new TimerConfigurationResponseDTO(CONFIG_ID, "Classic Sparring", 12, 180, 60);
+        responseDTO = new TimerConfigurationResponseDTO(CONFIG_ID, "Classic Sparring", 12, 180, 60, true, true);
 
         requestDTO = new TimerConfigurationRequestDTO();
         requestDTO.setName("Classic Sparring");
         requestDTO.setRounds(12);
         requestDTO.setRoundDuration(180);
         requestDTO.setRest(60);
+        requestDTO.setWarnBeforeEnd(true);
+        requestDTO.setBellSound(true);
 
         User user = new User("Ana Lopez", "ana@boxing.com", "hashed", Role.BOXER);
         user.setId(USER_ID);

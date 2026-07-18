@@ -43,7 +43,8 @@ public class TimerConfigurationServiceImpl implements TimerConfigurationService 
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         TimerConfiguration config = new TimerConfiguration(
-                dto.getName(), dto.getRounds(), dto.getRoundDuration(), dto.getRest(), user
+                dto.getName(), dto.getRounds(), dto.getRoundDuration(), dto.getRest(),
+                dto.getWarnBeforeEnd(), dto.getBellSound(), user
         );
 
         return toResponse(timerConfigurationRepository.save(config));
@@ -59,6 +60,8 @@ public class TimerConfigurationServiceImpl implements TimerConfigurationService 
         config.setRounds(dto.getRounds());
         config.setRoundDuration(dto.getRoundDuration());
         config.setRest(dto.getRest());
+        config.setWarnBeforeEnd(dto.getWarnBeforeEnd());
+        config.setBellSound(dto.getBellSound());
 
         return toResponse(timerConfigurationRepository.save(config));
     }
@@ -78,7 +81,9 @@ public class TimerConfigurationServiceImpl implements TimerConfigurationService 
                 config.getName(),
                 config.getRounds(),
                 config.getRoundDuration(),
-                config.getRest()
+                config.getRest(),
+                config.getWarnBeforeEnd(),
+                config.getBellSound()
         );
     }
 }

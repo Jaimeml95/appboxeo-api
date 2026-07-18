@@ -23,6 +23,12 @@ public class TimerConfigurationRequestDTO {
     @Min(value = 0, message = "Rest must not be negative")
     private Integer rest;
 
+    @NotNull(message = "warnBeforeEnd must not be null")
+    private Boolean warnBeforeEnd;
+
+    @NotNull(message = "bellSound must not be null")
+    private Boolean bellSound;
+
     public TimerConfigurationRequestDTO() {}
 
     public String getName() { return name; }
@@ -36,4 +42,10 @@ public class TimerConfigurationRequestDTO {
 
     public Integer getRest() { return rest; }
     public void setRest(Integer rest) { this.rest = rest; }
+
+    public Boolean getWarnBeforeEnd() { return warnBeforeEnd; }
+    public void setWarnBeforeEnd(Boolean warnBeforeEnd) { this.warnBeforeEnd = warnBeforeEnd; }
+
+    public Boolean getBellSound() { return bellSound; }
+    public void setBellSound(Boolean bellSound) { this.bellSound = bellSound; }
 }

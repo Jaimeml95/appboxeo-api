@@ -36,17 +36,28 @@ public class TimerConfiguration {
     @Column(nullable = false)
     private Integer rest;
 
+    @NotNull(message = "warnBeforeEnd must not be null")
+    @Column(name = "warn_before_end", nullable = false)
+    private Boolean warnBeforeEnd;
+
+    @NotNull(message = "bellSound must not be null")
+    @Column(name = "bell_sound", nullable = false)
+    private Boolean bellSound;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     public TimerConfiguration() {}
 
-    public TimerConfiguration(String name, Integer rounds, Integer roundDuration, Integer rest, User user) {
+    public TimerConfiguration(String name, Integer rounds, Integer roundDuration, Integer rest,
+                               Boolean warnBeforeEnd, Boolean bellSound, User user) {
         this.name = name;
         this.rounds = rounds;
         this.roundDuration = roundDuration;
         this.rest = rest;
+        this.warnBeforeEnd = warnBeforeEnd;
+        this.bellSound = bellSound;
         this.user = user;
     }
 
@@ -64,6 +75,12 @@ public class TimerConfiguration {
 
     public Integer getRest() { return rest; }
     public void setRest(Integer rest) { this.rest = rest; }
+
+    public Boolean getWarnBeforeEnd() { return warnBeforeEnd; }
+    public void setWarnBeforeEnd(Boolean warnBeforeEnd) { this.warnBeforeEnd = warnBeforeEnd; }
+
+    public Boolean getBellSound() { return bellSound; }
+    public void setBellSound(Boolean bellSound) { this.bellSound = bellSound; }
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

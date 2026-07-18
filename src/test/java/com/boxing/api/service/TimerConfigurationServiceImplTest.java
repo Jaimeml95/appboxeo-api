@@ -52,7 +52,7 @@ class TimerConfigurationServiceImplTest {
         user = new User("Carlos", "carlos@boxing.com", "password123", Role.BOXER);
         user.setId(USER_ID);
 
-        config = new TimerConfiguration("Classic Rounds", 3, 180, 60, user);
+        config = new TimerConfiguration("Classic Rounds", 3, 180, 60, true, true, user);
         config.setId(CONFIG_ID);
 
         requestDTO = new TimerConfigurationRequestDTO();
@@ -60,6 +60,8 @@ class TimerConfigurationServiceImplTest {
         requestDTO.setRounds(3);
         requestDTO.setRoundDuration(180);
         requestDTO.setRest(60);
+        requestDTO.setWarnBeforeEnd(true);
+        requestDTO.setBellSound(true);
     }
 
     @Test
@@ -111,6 +113,8 @@ class TimerConfigurationServiceImplTest {
         updatedDTO.setRounds(6);
         updatedDTO.setRoundDuration(120);
         updatedDTO.setRest(30);
+        updatedDTO.setWarnBeforeEnd(false);
+        updatedDTO.setBellSound(false);
 
         when(timerConfigurationRepository.findByIdAndUserId(CONFIG_ID, USER_ID)).thenReturn(Optional.of(config));
         when(timerConfigurationRepository.save(any(TimerConfiguration.class))).thenAnswer(inv -> inv.getArgument(0));
