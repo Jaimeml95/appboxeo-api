@@ -96,6 +96,26 @@ class TimerConfigurationControllerTest {
     }
 
     @Test
+    void get_existing_returnsConfigurationAndStatus200() throws Exception {
+        when(timerConfigurationService.getById(CONFIG_ID, USER_ID)).thenReturn(responseDTO);
+
+        mockMvc.perform(get("/api/v1/timer-configurations/" + CONFIG_ID)
+                        .with(authentication(authBoxer)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Classic Sparring"));
+    }
+
+    @Test
+    void get_nonExistingId_returnsStatus404() throws Exception {
+        when(timerConfigurationService.getById(NON_EXISTING_ID, USER_ID))
+                .thenThrow(new NoSuchElementException("Configuration not found"));
+
+        mockMvc.perform(get("/api/v1/timer-configurations/" + NON_EXISTING_ID)
+                        .with(authentication(authBoxer)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void create_valid_returnsConfigurationAndStatus201() throws Exception {
         when(timerConfigurationService.create(any(TimerConfigurationRequestDTO.class), eq(USER_ID))).thenReturn(responseDTO);
 

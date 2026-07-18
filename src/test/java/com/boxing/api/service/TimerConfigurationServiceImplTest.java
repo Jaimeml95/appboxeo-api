@@ -85,6 +85,24 @@ class TimerConfigurationServiceImplTest {
     }
 
     @Test
+    void getById_existing_returnsConfiguration() {
+        when(timerConfigurationRepository.findByIdAndUserId(CONFIG_ID, USER_ID)).thenReturn(Optional.of(config));
+
+        TimerConfigurationResponseDTO result = timerConfigurationService.getById(CONFIG_ID, USER_ID);
+
+        assertThat(result.getName()).isEqualTo("Classic Rounds");
+    }
+
+    @Test
+    void getById_nonExisting_throwsException() {
+        when(timerConfigurationRepository.findByIdAndUserId(NON_EXISTING_CONFIG_ID, USER_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> timerConfigurationService.getById(NON_EXISTING_CONFIG_ID, USER_ID))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("Configuration not found");
+    }
+
+    @Test
     void create_existingUser_savesAndReturnsConfiguration() {
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         when(timerConfigurationRepository.save(any(TimerConfiguration.class))).thenReturn(config);

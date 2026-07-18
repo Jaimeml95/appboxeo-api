@@ -37,6 +37,12 @@ public class TimerConfigurationServiceImpl implements TimerConfigurationService 
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public TimerConfigurationResponseDTO getById(UUID id, UUID userId) {
+        return toResponse(findConfigByIdAndUser(id, userId));
+    }
+
+    @Override
     @Transactional
     public TimerConfigurationResponseDTO create(TimerConfigurationRequestDTO dto, UUID userId) {
         User user = userRepository.findById(userId)
@@ -53,8 +59,7 @@ public class TimerConfigurationServiceImpl implements TimerConfigurationService 
     @Override
     @Transactional
     public TimerConfigurationResponseDTO update(UUID id, TimerConfigurationRequestDTO dto, UUID userId) {
-        TimerConfiguration config = timerConfigurationRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new NoSuchElementException("Configuration not found"));
+        TimerConfiguration config = findConfigByIdAndUser(id, userId);
 
         config.setName(dto.getName());
         config.setRounds(dto.getRounds());
@@ -69,10 +74,12 @@ public class TimerConfigurationServiceImpl implements TimerConfigurationService 
     @Override
     @Transactional
     public void delete(UUID id, UUID userId) {
-        TimerConfiguration config = timerConfigurationRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new NoSuchElementException("Configuration not found"));
+        timerConfigurationRepository.delete(findConfigByIdAndUser(id, userId));
+    }
 
-        timerConfigurationRepository.delete(config);
+    private TimerConfiguration findConfigByIdAndUser(UUID id, UUID userId) {
+        return timerConfigurationRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new NoSuchElementException("Configuration not found"));
     }
 
     private TimerConfigurationResponseDTO toResponse(TimerConfiguration config) {

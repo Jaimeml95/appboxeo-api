@@ -43,6 +43,17 @@ public class TimerConfigurationController {
         return ResponseEntity.ok(timerConfigurationService.getByUser(user.getId()));
     }
 
+    @Operation(summary = "Get configuration", description = "Returns a single configuration of the authenticated user.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "403", description = "Missing token", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Configuration not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<TimerConfigurationResponseDTO> get(@PathVariable UUID id, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(timerConfigurationService.getById(id, user.getId()));
+    }
+
     @Operation(summary = "Create configuration", description = "Creates a new timer configuration for the authenticated user.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Configuration created"),
